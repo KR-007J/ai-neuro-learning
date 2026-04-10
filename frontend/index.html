@@ -619,7 +619,7 @@
                 Start Lesson
             </a>
 
-            <button class="nav-item" onclick="exportData()">
+            <button class="nav-item action-export">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                     <polyline points="7 10 12 15 17 10"/>
@@ -658,7 +658,7 @@
                 <p>Your AI-powered learning dashboard</p>
             </div>
             <div class="header-right">
-                <button class="btn btn-primary" id="btn-start" onclick="startLearning()">
+                <button class="btn btn-primary" id="btn-start">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <polygon points="5 3 19 12 5 21 5 3"/>
                     </svg>
@@ -798,7 +798,7 @@
                                 <div class="action-name">Challenge Mode</div>
                                 <div class="action-desc">Push your limits</div>
                             </button>
-                            <button class="action-card" onclick="exportData()">
+                            <button class="action-card action-export">
                                 <div class="action-icon">📊</div>
                                 <div class="action-name">Export Progress</div>
                                 <div class="action-desc">Download your data</div>
@@ -889,66 +889,5 @@
 </div>
 
 <script src="app.js"></script>
-<script>
-    function goToLesson(topic, difficulty = 'intermediate') {
-        window.location.href = `lesson.html?topic=${encodeURIComponent(topic)}&difficulty=${difficulty}`;
-    }
-
-    function showToast(message, type = 'info') {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.className = `toast ${type} show`;
-        setTimeout(() => toast.classList.remove('show'), 3000);
-    }
-
-    async function exportData() {
-        const btn = document.getElementById('btn-start');
-        showToast('Preparing your export...', 'info');
-        try {
-            const userId = JSON.parse(localStorage.getItem('neurolearn_user'))?.user_id || 'demo_user_123';
-            const response = await fetch(`https://ai-neuro-backend.onrender.com/api/v1/users/${userId}/export`);
-            if (response.ok) {
-                const blob = await response.blob();
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'neurolearn-export.json';
-                a.click();
-                URL.revokeObjectURL(url);
-                showToast('Export downloaded! ✅', 'success');
-            } else {
-                showToast('Export failed. Try again.', 'error');
-            }
-        } catch {
-            showToast('Export failed. Check connection.', 'error');
-        }
-    }
-
-    async function startLearning() {
-        const btn = document.getElementById('btn-start');
-        btn.disabled = true;
-        btn.innerHTML = '<div class="spin"></div> Loading...';
-        try {
-            const userId = JSON.parse(localStorage.getItem('neurolearn_user'))?.user_id || 'demo_user_123';
-            const res = await fetch('https://ai-neuro-backend.onrender.com/api/v1/adaptation/next-lesson', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: userId })
-            });
-            if (res.ok) {
-                const data = await res.json();
-                window.location.href = `lesson.html?topic=${encodeURIComponent(data.lesson_title)}&difficulty=${data.difficulty}`;
-            } else {
-                window.location.href = 'lesson.html';
-            }
-        } catch {
-            window.location.href = 'lesson.html';
-        }
-    }
-
-    window.showToast  = showToast;
-    window.goToLesson = goToLesson;
-    window.exportData = exportData;
-</script>
 </body>
 </html>

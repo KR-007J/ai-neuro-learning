@@ -166,7 +166,11 @@
         // Get user from localStorage
         const userStr = localStorage.getItem('neurolearn_user');
         const currentUser = userStr ? JSON.parse(userStr) : null;
-        if (!currentUser) window.location.href = 'login.html';
+        if (!currentUser || !currentUser.user_id) {
+            window.location.href = 'login.html';
+        }
+        
+        const AUTH_TOKEN = currentUser?.id_token;
 
         // Get URL params
         const params     = new URLSearchParams(window.location.search);
@@ -192,7 +196,10 @@
             try {
                 const response = await fetch(`${API_BASE_URL}/api/v1/adaptation/generate-lesson`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${AUTH_TOKEN}`
+                    },
                     body: JSON.stringify({
                         user_id: currentUser.user_id,
                         topic: topic,
@@ -324,7 +331,10 @@
             try {
                 const res = await fetch(`${API_BASE_URL}/api/v1/adaptation/quiz-feedback`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${AUTH_TOKEN}`
+                    },
                     body: JSON.stringify({
                         question: q.question,
                         user_answer: answerIndex,
@@ -352,7 +362,10 @@
             try {
                 await fetch(`${API_BASE_URL}/api/v1/assessment/analytics`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${AUTH_TOKEN}`
+                    },
                     body: JSON.stringify({
                         user_id: currentUser.user_id,
                         session_id: `session_${Date.now()}`,

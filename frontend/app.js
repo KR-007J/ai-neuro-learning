@@ -8,11 +8,20 @@ const API_BASE_URL = 'https://ai-neuro-backend.onrender.com';
 function getCurrentUser() {
     const userStr = localStorage.getItem('neurolearn_user');
     if (!userStr) {
-        window.location.href = 'login.html';
+        if (!window.location.pathname.endsWith('login.html')) {
+            window.location.href = 'login.html';
+        }
         return null;
     }
     try {
-        return JSON.parse(userStr);
+        const user = JSON.parse(userStr);
+        // Check if token is older than 24h as a basic precaution
+        const now = new Date().getTime();
+        if (user.last_login && (now - user.last_login > 24 * 60 * 60 * 1000)) {
+            logout();
+            return null;
+        }
+        return user;
     } catch {
         localStorage.removeItem('neurolearn_user');
         window.location.href = 'login.html';
@@ -27,7 +36,8 @@ function logout() {
 
 // Get current user — redirects to login if not authenticated
 const currentUser = getCurrentUser();
-const USER_ID = currentUser?.user_id || 'demo_user_123';
+const USER_ID = currentUser?.user_id; // Remove demo fallback for security
+const AUTH_TOKEN = currentUser?.id_token;
 
 // ========================================
 // Initialize on load
@@ -147,7 +157,10 @@ async function loadUserData() {
 
         const response = await fetch(`${API_BASE_URL}/api/v1/users/${USER_ID}`, {
             method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${AUTH_TOKEN}`
+            }
         });
 
         if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
@@ -169,7 +182,10 @@ async function loadRecommendations() {
     try {
         const response = await fetch(`${API_BASE_URL}/api/v1/adaptation/recommend-content`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${AUTH_TOKEN}`
+            },
             body: JSON.stringify({
                 user_id: USER_ID,
                 user_profile: {
@@ -310,43 +326,57 @@ setTimeout(animateProgressBars, 500);
 // ========================================
 
 // Export Data button
-document.querySelector('.btn-secondary')?.addEventListener('click', async () => {
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/users/${USER_ID}/export`);
-        if (response.ok) {
-            const blob = await response.blob();
-            const url  = URL.createObjectURL(blob);
-            const a    = document.createElement('a');
-            a.href     = url;
-            a.download = `neurolearn-${USER_ID}-export.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-        } else {
+document.querySelectorAll('.action-export').forEach(btn => {
+    btn.addEventListener('click', async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/v1/users/${USER_ID}/export`, {
+                headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` }
+            });
+            if (response.ok) {
+                const blob = await response.blob();
+                const url  = URL.createObjectURL(blob);
+                const a    = document.createElement('a');
+                a.href     = url;
+                a.download = `neurolearn-${USER_ID}-export.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            } else {
+                alert('Export failed. Please try again later.');
+            }
+        } catch {
             alert('Export coming soon!');
         }
-    } catch {
-        alert('Export coming soon!');
-    }
+    });
 });
 
 // Start Learning button
-document.querySelector('.btn-primary')?.addEventListener('click', async () => {
+document.getElementById('btn-start')?.addEventListener('click', async () => {
+    const btn = document.getElementById('btn-start');
+    const originalContent = btn.innerHTML;
     try {
+        btn.disabled = true;
+        btn.innerHTML = 'Loading...';
+        
         const response = await fetch(`${API_BASE_URL}/api/v1/adaptation/next-lesson`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${AUTH_TOKEN}`
+            },
             body: JSON.stringify({ user_id: USER_ID })
         });
 
         if (response.ok) {
             const data = await response.json();
-            // ✅ Navigate to AI lesson page with topic and difficulty
             window.location.href = `lesson.html?topic=${encodeURIComponent(data.lesson_title)}&difficulty=${data.difficulty}`;
         } else {
             window.location.href = 'lesson.html';
         }
     } catch {
         window.location.href = 'lesson.html';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalContent;
     }
 });
 

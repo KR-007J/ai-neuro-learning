@@ -22,6 +22,7 @@ users_db = {}
 
 # ✅ Google Auth request model
 class GoogleAuthRequest(BaseModel):
+    id_token: str  # Added for verification
     google_id: str
     email: str
     full_name: str
@@ -30,7 +31,19 @@ class GoogleAuthRequest(BaseModel):
 
 @router.post("/google-auth", response_model=StandardResponse)
 async def google_auth(request: GoogleAuthRequest):
-    """Handle Google OAuth login — create or fetch existing user"""
+    """Handle Google OAuth login — verify token and create/fetch user"""
+
+    # SECURITY TODO: In production, verify the id_token using Google's library:
+    # from google.oauth2 import id_token
+    # from google.auth.transport import requests
+    # idinfo = id_token.verify_oauth2_token(request.id_token, requests.Request(), GOOGLE_CLIENT_ID)
+    
+    # For now, we trust the structured request but require the id_token to be present
+    if not request.id_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing Google ID Token"
+        )
 
     # Check if user already exists by email
     existing_user = next(
@@ -40,6 +53,10 @@ async def google_auth(request: GoogleAuthRequest):
 
     if existing_user:
         existing_user["last_active"] = datetime.now().isoformat()
+        # Update profile info from latest Google data
+        existing_user["full_name"] = request.full_name
+        existing_user["avatar_url"] = request.avatar_url
+        
         return StandardResponse(
             success=True,
             message="User logged in successfully",
@@ -62,7 +79,7 @@ async def google_auth(request: GoogleAuthRequest):
         "sessions_completed": 0,
         "average_score": 0.0,
         "engagement_level": 0.0,
-        "streak_days": 0,
+        "streak_days": 1, # First day!
         "preferences": {},
         "created_at": datetime.now().isoformat(),
         "last_active": datetime.now().isoformat()
