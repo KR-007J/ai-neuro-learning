@@ -4,31 +4,31 @@
    ======================================== */
 
 :root {
-    /* Crystal Professional Palette */
-    --brand-indigo: #818cf8;
-    --brand-blue:   #60a5fa;
-    --brand-emerald: #34d399;
-    --brand-rose:    #fb7185;
-    --brand-amber:   #fbbf24;
+    /* Oceanic Crystal Palette (Vibrant & Soothing) */
+    --brand-indigo: #4f46e5;
+    --brand-blue:   #0ea5e9;
+    --brand-emerald: #10b981;
+    --brand-rose:    #f43f5e;
+    --brand-amber:   #f59e0b;
 
     /* Primary Accent Gradients */
-    --grad-primary:   linear-gradient(135deg, #818cf8, #60a5fa);
-    --grad-success:   linear-gradient(135deg, #34d399, #10b981);
-    --grad-danger:    linear-gradient(135deg, #fb7185, #f43f5e);
-    --grad-warm:      linear-gradient(135deg, #fbbf24, #f59e0b);
+    --grad-primary:   linear-gradient(135deg, var(--brand-indigo), var(--brand-blue));
+    --grad-success:   linear-gradient(135deg, var(--brand-emerald), #059669);
+    --grad-danger:    linear-gradient(135deg, var(--brand-rose), #e11d48);
+    --grad-warm:      linear-gradient(135deg, var(--brand-amber), #d97706);
     
     /* Crystal Glass Tokens */
     --glass-border:   rgba(255, 255, 255, 0.1);
     --glass-bg:       rgba(15, 23, 42, 0.4);
     --glass-blur:     24px;
 
-    /* Base Surfaces (Dark Mode - Default) */
-    --bg:            #08080c;
-    --surface-1:     #111118;
-    --surface-2:     #1a1a24;
-    --surface-3:     #242436;
-    --border:        rgba(255, 255, 255, 0.08);
-    --border-hover:  rgba(255, 255, 255, 0.15);
+    /* Base Surfaces */
+    --bg:            #06080b;
+    --surface-1:     #0c1016;
+    --surface-2:     #131a24;
+    --surface-3:     #1e293b;
+    --border:        rgba(255, 255, 255, 0.07);
+    --border-hover:  rgba(255, 255, 255, 0.14);
     --text-primary:   #f8fafc;
     --text-secondary: #94a3b8;
     --text-muted:     #475569;
@@ -196,10 +196,9 @@ body {
 }
 .nav-item:hover { background:var(--surface-2); color:var(--text-primary); transform:translateX(2px); }
 .nav-item.active {
-    background:rgba(124,92,252,.18);
-    color:var(--brand-purple);
-    font-weight:600;
-    border:1px solid rgba(124,92,252,.25);
+    background: rgba(79, 70, 229, 0.12); /* Indigo-600 background-like */
+    color: var(--brand-indigo);
+    font-weight: 600;
 }
 .nav-divider { margin:8px 12px; border:none; border-top:1px solid var(--border); }
 
@@ -244,12 +243,14 @@ body {
    MAIN CONTENT
 ════════════════════════════════════════ */
 .main-content {
-    margin-left:var(--sidebar-w);
-    min-height:100vh;
-    padding:28px 32px;
-    position:relative; z-index:1;
+    margin-left: var(--sidebar-w);
+    min-height: 100vh;
+    padding: 24px 32px;
+    position: relative; 
     transition: margin-left var(--dur-med) var(--ease-smooth);
+    z-index: 1;
 }
+
 .sidebar.collapsed ~ .main-content {
     margin-left: var(--sidebar-collapsed-w);
 }
@@ -312,9 +313,23 @@ body.sidebar-collapsed .main-content {
     border-color: var(--brand-indigo);
 }
 
-.btn-sm { padding:7px 14px; font-size:12px; }
-.btn-lg { padding:14px 28px; font-size:15px; }
-.btn:disabled { opacity:.45; cursor:not-allowed; transform:none !important; }
+.btn-sidebar-toggle {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all var(--dur-fast) var(--ease-smooth);
+    margin-right: 16px;
+}
+.btn-sidebar-toggle:hover {
+    background: var(--surface-3);
+    color: var(--brand-indigo);
+    border-color: var(--brand-indigo);
+    transform: scale(1.05);
+}
 
 /* Spin inside button */
 .btn .spin {

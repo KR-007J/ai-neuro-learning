@@ -114,14 +114,18 @@ function initUI() {
         document.body.classList.add('sidebar-collapsed');
     }
 
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
-            const nowCollapsed = sidebar.classList.contains('collapsed');
-            document.body.classList.toggle('sidebar-collapsed', nowCollapsed);
-            localStorage.setItem('neurolearn_sidebar_collapsed', nowCollapsed);
-        });
-    }
+    const desktopToggle = document.getElementById('btn-sidebar-toggle');
+
+    const toggleSidebar = () => {
+        if (!sidebar) return;
+        sidebar.classList.toggle('collapsed');
+        const nowCollapsed = sidebar.classList.contains('collapsed');
+        document.body.classList.toggle('sidebar-collapsed', nowCollapsed);
+        localStorage.setItem('neurolearn_sidebar_collapsed', nowCollapsed);
+    };
+
+    if (sidebarToggle) sidebarToggle.addEventListener('click', toggleSidebar);
+    if (desktopToggle) desktopToggle.addEventListener('click', toggleSidebar);
 
     // Stagger animation trigger
     const staggerGrids = document.querySelectorAll('.anim-stagger');
