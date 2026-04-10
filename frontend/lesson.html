@@ -9,8 +9,16 @@
 <link rel="stylesheet" href="styles.css">
 <style>
 /* Lesson-specific overrides */
-.lesson-page { margin-left:var(--sidebar-w); padding:28px 32px; min-height:100vh; position:relative; z-index:1; }
+.lesson-page { 
+  margin-left:var(--sidebar-w); 
+  padding:28px 32px; 
+  min-height:100vh; 
+  position:relative; 
+  z-index:1; 
+  transition: margin-left var(--dur-med) var(--ease-smooth);
+}
 @media(max-width:768px){.lesson-page{margin-left:0;padding:16px;}}
+body.sidebar-collapsed .lesson-page { margin-left: var(--sidebar-collapsed-w); }
 
 .lesson-top { display:flex; align-items:center; gap:12px; margin-bottom:24px; flex-wrap:wrap; }
 .back-btn { display:flex; align-items:center; gap:6px; background:var(--surface-2); border:1px solid var(--border);
@@ -135,19 +143,24 @@
 </head>
 <body>
 
+<!-- Mesh background -->
 <div class="mesh-bg">
-  <div class="mesh-orb mesh-orb-1"></div>
-  <div class="mesh-orb mesh-orb-2"></div>
+    <div class="mesh-orb mesh-orb-1"></div>
+    <div class="mesh-orb mesh-orb-2"></div>
 </div>
+
+<!-- Theme toggle -->
+<button class="theme-toggle" id="theme-toggle" title="Toggle Day/Night mode" style="background: rgba(255,255,255,0.05);">
+  <span id="theme-icon">🌙</span>
+</button>
 
 <div id="toast-container"></div>
 
-<!-- Mobile hamburger -->
-<button class="hamburger" id="hamburger">☰</button>
-<div class="sidebar-overlay" id="sidebar-overlay"></div>
-
 <!-- Sidebar -->
 <aside class="sidebar" id="sidebar">
+  <button class="sidebar-toggle" id="sidebar-toggle" title="Shrink Sidebar">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
   <div class="sidebar-header">
     <a href="index.html" class="logo">
       <div class="logo-icon">🧠</div>

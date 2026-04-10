@@ -81,9 +81,59 @@ const AUTH_TOKEN  = currentUser?.id_token || null;
 const IS_GUEST    = currentUser?.is_guest ?? false;
 
 // ═══════════════════════════════════════
+// UI — Theme & Sidebar Management
+// ═══════════════════════════════════════
+
+function initUI() {
+    // Theme logic
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon   = document.getElementById('theme-icon');
+    const savedTheme  = localStorage.getItem('neurolearn_theme') || 'dark';
+    
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    if (themeIcon) themeIcon.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next    = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('neurolearn_theme', next);
+            if (themeIcon) themeIcon.textContent = next === 'dark' ? '🌙' : '☀️';
+            showToast(`Switched to ${next} mode`, 'info', 2000);
+        });
+    }
+
+    // Sidebar Collapse logic
+    const sidebar       = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const isCollapsed   = localStorage.getItem('neurolearn_sidebar_collapsed') === 'true';
+
+    if (isCollapsed && sidebar) {
+        sidebar.classList.add('collapsed');
+        document.body.classList.add('sidebar-collapsed');
+    }
+
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            const nowCollapsed = sidebar.classList.contains('collapsed');
+            document.body.classList.toggle('sidebar-collapsed', nowCollapsed);
+            localStorage.setItem('neurolearn_sidebar_collapsed', nowCollapsed);
+        });
+    }
+
+    // Stagger animation trigger
+    const staggerGrids = document.querySelectorAll('.anim-stagger');
+    staggerGrids.forEach(grid => {
+        setTimeout(() => grid.classList.add('loaded'), 100);
+    });
+}
+
 // DOM READY — Bootstrap everything
 // ═══════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
+    initUI();
     setupUserProfile();
     wakeBackend();
 

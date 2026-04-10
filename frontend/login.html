@@ -18,209 +18,79 @@
         }
 
         body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background-color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
+            margin: 0; padding: 0;
+            background-color: var(--bg);
             color: var(--text-primary);
+            display: flex; align-items: center; justify-content: center; min-height: 100vh;
+            overflow: hidden;
+            transition: background var(--dur-med);
         }
 
         .auth-container {
-            width: 100%;
-            max-width: 450px;
-            padding: 48px 40px 36px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
+            width: 100%; max-width: 440px;
+            padding: 48px 40px;
+            background: var(--grad-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
             text-align: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative; z-index: 10;
+            box-shadow: var(--shadow-lg);
+            animation: fadeInScale 0.6s var(--ease-spring);
+        }
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
-        @media (max-width: 500px) {
-            .auth-container {
-                border: none;
-                padding: 24px;
-            }
-        }
-
-        .brand-logo {
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .brand-name {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 24px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #4285f4, #34a853);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        h1 {
-            font-size: 24px;
-            font-weight: 400;
-            margin: 0 0 8px;
-        }
-
-        .subtitle {
-            font-size: 16px;
-            color: var(--text-primary);
-            margin-bottom: 40px;
-        }
-
-        .google-button-wrapper {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 32px;
-            min-height: 40px;
-        }
+        .subtitle { color: var(--text-secondary); margin-bottom: 32px; }
 
         .info-box {
-            text-align: left;
-            padding: 24px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            margin-bottom: 24px;
-            font-size: 14px;
-            line-height: 1.5;
-            color: var(--text-secondary);
+            text-align: left; padding: 20px;
+            background: var(--surface-2); border-radius: var(--radius-md);
+            margin-bottom: 24px; font-size: 13px; line-height: 1.6;
+            color: var(--text-secondary); border: 1px solid var(--border);
         }
 
-        .info-item {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .info-item:last-child { margin-bottom: 0; }
-
-        .info-icon {
-            color: var(--google-blue);
-            font-size: 16px;
-        }
-
-        .footer {
-            margin-top: 40px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .footer a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            margin-left: 16px;
-        }
-
-        .footer a:hover { text-decoration: underline; }
-
-        /* Loading state */
-        .loading-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(255,255,255,0.8);
-            z-index: 100;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .loading-overlay.active { display: flex; }
-
-        .spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid var(--google-blue);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .error-message {
-            color: var(--google-red);
-            font-size: 14px;
-            margin-top: 16px;
-            display: none;
-        }
-        .error-message.visible { display: block; }
-
-        /* Divider */
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 0 0 20px;
-            color: #bdc1c6;
-            font-size: 12px;
-        }
-        .divider::before, .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--border-color);
-        }
-
-        /* Guest button */
         .guest-btn {
-            width: 100%;
-            padding: 10px 24px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            background: #fff;
-            color: var(--text-secondary);
-            font-family: 'Roboto', sans-serif;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: background 0.15s, box-shadow 0.15s;
-            margin-bottom: 8px;
+            width: 100%; padding: 12px;
+            border-radius: var(--radius-sm); border: 1.5px solid var(--border);
+            background: var(--surface-1); color: var(--text-primary);
+            font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: all var(--dur-fast);
         }
-        .guest-btn:hover {
-            background: #f8f9fa;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
+        .guest-btn:hover { background: var(--surface-2); transform: translateY(-1px); border-color: var(--brand-purple); }
 
-        /* Guest disclaimer */
         .guest-disclaimer {
-            background: #fff8e1;
-            border: 1px solid #ffe082;
-            border-radius: 6px;
-            padding: 10px 14px;
-            font-size: 12px;
-            color: #795548;
-            line-height: 1.5;
-            margin-bottom: 20px;
-            text-align: left;
-            display: flex;
-            gap: 8px;
-            align-items: flex-start;
-        }
-        .guest-disclaimer svg {
-            flex-shrink: 0;
-            margin-top: 1px;
+            background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3);
+            border-radius: var(--radius-sm); padding: 12px;
+            font-size: 11px; color: var(--text-secondary); text-align: left;
+            display: flex; gap: 10px; margin-top: 12px;
         }
     </style>
 </head>
 <body>
 
+    <!-- Mesh background -->
+    <div class="mesh-bg">
+        <div class="mesh-orb mesh-orb-1"></div>
+        <div class="mesh-orb mesh-orb-2"></div>
+    </div>
+
+    <!-- Mobile hamburger -->
+<button class="hamburger" id="hamburger" aria-label="Menu">☰</button>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- Theme toggle -->
+<button class="theme-toggle" id="theme-toggle" title="Toggle Day/Night mode">
+  <span id="theme-icon">🌙</span>
+</button>
+
+<div id="toast-container"></div>
+
     <div class="loading-overlay" id="loading-overlay">
         <div class="spinner"></div>
-        <p style="margin-top: 12px; font-size: 14px; color: var(--google-blue);">One moment...</p>
+        <p style="margin-top: 12px; font-size: 14px; color: var(--brand-purple);">One moment...</p>
     </div>
 
     <div class="auth-container">
@@ -241,12 +111,10 @@
         <p class="subtitle">to continue to NeuroLearn AI</p>
 
         <div class="google-button-wrapper">
-            <!-- Google Identity Services button will be rendered here -->
             <div id="google-signin-btn"></div>
         </div>
 
         <div id="error-msg" class="error-message"></div>
-
         <div class="divider">or</div>
 
         <!-- Guest Login -->
