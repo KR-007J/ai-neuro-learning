@@ -1,413 +1,603 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeuroLearn - AI Lesson</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-        body { background: var(--gray-50); }
-        .lesson-page { max-width: 860px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 1; }
-        .back-btn {
-            display: inline-flex; align-items: center; gap: 8px;
-            color: #667eea; font-weight: 600; font-size: 14px;
-            text-decoration: none; margin-bottom: 24px;
-            background: white; padding: 8px 16px; border-radius: 10px;
-            border: 1px solid #e5e7eb; transition: all 0.2s;
-        }
-        .back-btn:hover { box-shadow: 0 4px 12px rgba(102,126,234,0.15); transform: translateX(-2px); }
-        .lesson-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
-        .lesson-header {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            padding: 40px; color: white;
-        }
-        .lesson-meta { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
-        .lesson-tag {
-            background: rgba(255,255,255,0.2); padding: 4px 12px;
-            border-radius: 20px; font-size: 12px; font-weight: 600;
-        }
-        .lesson-header h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
-        .lesson-header p { opacity: 0.85; font-size: 15px; }
-        .objectives {
-            background: rgba(255,255,255,0.15); border-radius: 12px;
-            padding: 16px 20px; margin-top: 20px;
-        }
-        .objectives h4 {
-            font-size: 13px; font-weight: 700; opacity: 0.8;
-            margin-bottom: 8px; letter-spacing: 0.05em;
-        }
-        .objectives ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
-        .objectives li { font-size: 14px; display: flex; align-items: center; gap: 8px; }
-        .objectives li::before { content: '✓'; font-weight: 700; }
-        .lesson-body { padding: 40px; }
-        .section-block { margin-bottom: 40px; }
-        .section-block h3 {
-            font-size: 20px; font-weight: 700; color: #111827;
-            margin-bottom: 16px; padding-bottom: 8px;
-            border-bottom: 2px solid #f3f4f6;
-        }
-        .section-block p { font-size: 15px; line-height: 1.8; color: #374151; margin-bottom: 16px; }
-        .key-point {
-            background: linear-gradient(135deg, #667eea10, #764ba210);
-            border-left: 4px solid #667eea; border-radius: 0 12px 12px 0;
-            padding: 14px 18px; font-size: 14px; font-weight: 600;
-            color: #374151; margin-top: 16px;
-        }
-        .key-point::before { content: '💡 Key Point: '; color: #667eea; }
-        .code-block {
-            background: #1f2937; color: #e5e7eb; padding: 24px;
-            border-radius: 12px; font-family: 'JetBrains Mono', monospace;
-            font-size: 13px; line-height: 1.7; overflow-x: auto;
-            margin: 16px 0; position: relative;
-        }
-        .code-block pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
-        .code-label {
-            position: absolute; top: 8px; right: 12px;
-            font-size: 11px; color: #6b7280;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        .quiz-section { margin-top: 48px; }
-        .quiz-section h2 { font-size: 22px; font-weight: 800; color: #111827; margin-bottom: 24px; }
-        .quiz-question {
-            background: #f9fafb; border-radius: 16px; padding: 24px;
-            margin-bottom: 20px; border: 2px solid #e5e7eb; transition: border-color 0.2s;
-        }
-        .quiz-question.correct  { border-color: #10b981; background: #f0fdf4; }
-        .quiz-question.incorrect { border-color: #ef4444; background: #fef2f2; }
-        .question-text { font-size: 16px; font-weight: 600; color: #111827; margin-bottom: 16px; }
-        .options { display: flex; flex-direction: column; gap: 10px; }
-        .option-btn {
-            padding: 12px 16px; background: white; border: 2px solid #e5e7eb;
-            border-radius: 10px; text-align: left; cursor: pointer; font-size: 14px;
-            font-weight: 500; color: #374151; transition: all 0.2s;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        .option-btn:hover:not(:disabled) { border-color: #667eea; color: #667eea; }
-        .option-btn.selected-correct   { background: #10b981; border-color: #10b981; color: white; }
-        .option-btn.selected-incorrect { background: #ef4444; border-color: #ef4444; color: white; }
-        .option-btn.reveal-correct     { background: #d1fae5; border-color: #10b981; color: #065f46; }
-        .feedback-box {
-            margin-top: 12px; padding: 12px 16px; background: white;
-            border-radius: 10px; font-size: 13px; color: #374151;
-            line-height: 1.6; display: none; border: 1px solid #e5e7eb;
-        }
-        .feedback-box.visible { display: block; }
-        .ai-loading {
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; padding: 80px 40px; gap: 20px;
-        }
-        .ai-loading-spinner {
-            width: 56px; height: 56px; border: 4px solid #e5e7eb;
-            border-top-color: #667eea; border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        .ai-loading p     { color: #667eea; font-weight: 600; font-size: 16px; }
-        .ai-loading small { color: #9ca3af; font-size: 13px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .summary-box {
-            background: linear-gradient(135deg, #667eea08, #764ba208);
-            border: 1px solid #667eea30; border-radius: 16px;
-            padding: 24px; margin: 32px 0;
-        }
-        .summary-box h3 { font-size: 16px; font-weight: 700; color: #667eea; margin-bottom: 8px; }
-        .summary-box p  { font-size: 15px; color: #374151; line-height: 1.7; }
-        .next-topic-badge {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white; padding: 8px 16px; border-radius: 20px;
-            font-size: 13px; font-weight: 600; margin-top: 12px;
-        }
-        .lesson-actions {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 24px 40px; border-top: 1px solid #f3f4f6; background: #fafafa;
-        }
-        .complete-btn {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white; border: none; padding: 12px 28px;
-            border-radius: 12px; font-size: 15px; font-weight: 700;
-            cursor: pointer; transition: all 0.2s;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        .complete-btn:hover    { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16,185,129,0.3); }
-        .complete-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-        .score-badge { font-size: 14px; font-weight: 600; color: #6b7280; }
-        .score-badge span { color: #667eea; font-size: 20px; font-weight: 800; }
-        .error-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white; border: none; padding: 12px 28px;
-            border-radius: 12px; font-size: 15px; font-weight: 700;
-            cursor: pointer; margin-top: 16px;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson — NeuroLearn AI</title>
+<meta name="description" content="AI-generated adaptive lesson with quiz.">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+/* Lesson-specific overrides */
+.lesson-page { margin-left:var(--sidebar-w); padding:28px 32px; min-height:100vh; position:relative; z-index:1; }
+@media(max-width:768px){.lesson-page{margin-left:0;padding:16px;}}
+
+.lesson-top { display:flex; align-items:center; gap:12px; margin-bottom:24px; flex-wrap:wrap; }
+.back-btn { display:flex; align-items:center; gap:6px; background:var(--surface-2); border:1px solid var(--border);
+  border-radius:var(--radius-sm); padding:8px 14px; color:var(--text-secondary); font-size:13px; font-weight:600;
+  cursor:pointer; font-family:inherit; transition:all var(--dur-fast); text-decoration:none; }
+.back-btn:hover { background:var(--surface-3); color:var(--text-primary); }
+
+.lesson-title-area { flex:1; }
+.lesson-title { font-size:22px; font-weight:800; }
+.lesson-meta-row { display:flex; gap:8px; margin-top:4px; align-items:center; }
+
+.lesson-grid { display:grid; grid-template-columns:1fr 340px; gap:20px; }
+@media(max-width:1000px){.lesson-grid{grid-template-columns:1fr;}}
+
+/* Content area */
+.content-area {
+  background:var(--surface-1); border:1px solid var(--border); border-radius:var(--radius-lg);
+  overflow:hidden; display:flex; flex-direction:column;
+}
+.content-scroll { flex:1; padding:28px; overflow-y:auto; line-height:1.8; }
+.content-scroll h2 { font-size:19px; font-weight:800; margin:22px 0 10px; color:var(--brand-purple); }
+.content-scroll h3 { font-size:15px; font-weight:700; margin:16px 0 8px; color:var(--text-primary); }
+.content-scroll p  { color:var(--text-secondary); margin-bottom:12px; }
+.content-scroll ul { color:var(--text-secondary); padding-left:20px; margin-bottom:12px; }
+.content-scroll li { margin-bottom:5px; }
+.content-scroll code {
+  background:var(--surface-3); color:var(--brand-teal);
+  padding:2px 7px; border-radius:4px; font-size:13px; font-family:monospace;
+}
+.content-scroll pre {
+  background:var(--surface-3); padding:16px; border-radius:var(--radius-md);
+  overflow-x:auto; margin:12px 0; border:1px solid var(--border);
+  font-family:monospace; font-size:13px; color:var(--text-primary);
+}
+.section-loader { display:flex; flex-direction:column; gap:12px; padding:20px 0; }
+.skel { height:16px; border-radius:6px; }
+.skel-sm { width:60%; }
+.skel-md { width:85%; }
+.skel-lg { width:95%; }
+
+.content-footer {
+  padding:18px 28px; border-top:1px solid var(--border);
+  display:flex; justify-content:space-between; align-items:center; gap:12px;
+}
+.lesson-progress { flex:1; }
+.lesson-progress-bar { height:6px; background:var(--surface-3); border-radius:4px; overflow:hidden; margin-top:4px; }
+.lesson-progress-fill { height:100%; background:var(--grad-primary); width:0%; transition:width 1s var(--ease-spring); border-radius:4px; }
+
+/* Sidebar panel */
+.lesson-sidebar { display:flex; flex-direction:column; gap:16px; }
+
+/* Quiz card */
+.quiz-card {
+  background:var(--surface-1); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden;
+  position:sticky; top:20px;
+}
+.quiz-head { padding:18px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+.quiz-head-title { font-size:14px; font-weight:700; }
+.quiz-counter { font-size:12px; color:var(--text-muted); }
+.quiz-body { padding:20px; }
+
+.question-text { font-size:14px; font-weight:600; margin-bottom:14px; line-height:1.5; color:var(--text-primary); }
+.options-list { display:flex; flex-direction:column; gap:8px; }
+.opt-btn {
+  padding:11px 15px; border-radius:var(--radius-sm);
+  border:1.5px solid var(--border); background:var(--surface-2);
+  color:var(--text-secondary); font-size:13px; font-weight:500;
+  cursor:pointer; text-align:left; font-family:inherit; width:100%;
+  transition:all var(--dur-fast);
+}
+.opt-btn:hover:not(:disabled) { border-color:var(--brand-purple); background:rgba(124,92,252,.08); color:var(--text-primary); }
+.opt-btn.selected { border-color:var(--brand-purple); background:rgba(124,92,252,.15); color:var(--brand-purple); }
+.opt-btn.correct  { border-color:var(--brand-teal);   background:rgba(0,212,170,.12); color:var(--brand-teal); }
+.opt-btn.wrong    { border-color:#f05f5f;              background:rgba(240,95,95,.10); color:#f05f5f; }
+
+.quiz-feedback {
+  margin-top:12px; padding:10px 14px; border-radius:var(--radius-sm); font-size:12px; display:none;
+}
+.quiz-feedback.show{ display:block; }
+.fb-correct { background:rgba(0,212,170,.1); border:1px solid rgba(0,212,170,.25); color:var(--brand-teal); }
+.fb-wrong   { background:rgba(240,95,95,.1); border:1px solid rgba(240,95,95,.25); color:#f05f5f; }
+
+.quiz-action { margin-top:14px; display:flex; gap:8px; justify-content:flex-end; }
+
+/* Score card */
+.score-card {
+  background:var(--surface-1); border:1px solid var(--border); border-radius:var(--radius-lg); padding:20px;
+  text-align:center;
+}
+.score-ring { margin:0 auto 12px; display:flex; align-items:center; justify-content:center; position:relative; }
+.score-ring-inner { position:absolute; text-align:center; }
+.score-big { font-size:24px; font-weight:800; }
+.score-sub { font-size:10px; color:var(--text-muted); }
+.score-label { font-size:13px; color:var(--text-secondary); margin-top:6px; }
+
+/* Floating AI badge */
+.ai-badge {
+  position:fixed; bottom:24px; right:24px; z-index:100;
+  background:var(--grad-primary); color:#fff;
+  border-radius:50px; padding:10px 18px; font-size:12px; font-weight:700;
+  box-shadow:var(--shadow-purple); display:flex; align-items:center; gap:6px;
+  animation:float-badge 3s ease-in-out infinite;
+  cursor:pointer;
+}
+@keyframes float-badge {
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-5px);}
+}
+
+/* Loading spinner full screen */
+.full-loader {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:60px 20px; gap:16px;
+}
+.big-spinner {
+  width:40px; height:40px; border:3px solid var(--surface-3);
+  border-top-color:var(--brand-purple); border-radius:50%;
+  animation:spin 1s linear infinite;
+}
+.loading-text { font-size:14px; color:var(--text-secondary); }
+</style>
 </head>
 <body>
-    <div class="animated-bg">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
+
+<div class="mesh-bg">
+  <div class="mesh-orb mesh-orb-1"></div>
+  <div class="mesh-orb mesh-orb-2"></div>
+</div>
+
+<div id="toast-container"></div>
+
+<!-- Mobile hamburger -->
+<button class="hamburger" id="hamburger">☰</button>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">🧠</div>
+      <span class="logo-text">NeuroLearn</span>
+    </a>
+  </div>
+  <div class="nav-section">
+    <span class="nav-label">Navigation</span>
+    <a class="nav-item" href="index.html">
+      <span class="icon">🏠</span><span class="label">Dashboard</span>
+    </a>
+    <a class="nav-item active" href="#">
+      <span class="icon">📖</span><span class="label">Current Lesson</span>
+    </a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar" id="user-avatar"><span id="user-initials">?</span></div>
+      <div class="user-info">
+        <div class="user-name" id="user-name">Loading…</div>
+        <div class="user-email" id="user-email">…</div>
+      </div>
     </div>
+    <button class="logout-btn" onclick="logout()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
 
-    <div class="lesson-page">
-        <a href="index.html" class="back-btn">← Back to Dashboard</a>
+<div class="lesson-page">
 
-        <div class="lesson-card" id="lesson-card">
-            <div class="ai-loading" id="ai-loading">
-                <div class="ai-loading-spinner"></div>
-                <p>🧠 Gemini AI is generating your lesson...</p>
-                <small>Personalizing content for your learning style</small>
-            </div>
+  <!-- Top bar -->
+  <div class="lesson-top anim-rise">
+    <a href="index.html" class="back-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      Dashboard
+    </a>
+    <div class="lesson-title-area">
+      <div class="lesson-title" id="lesson-title">AI Lesson</div>
+      <div class="lesson-meta-row">
+        <span class="chip chip-purple" id="lesson-diff-chip">Intermediate</span>
+        <span class="chip chip-teal" id="lesson-ai-badge">🤖 AI Generated</span>
+        <span style="font-size:12px;color:var(--text-muted)" id="lesson-duration"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main grid -->
+  <div class="lesson-grid">
+
+    <!-- Content area -->
+    <div class="content-area anim-rise" style="--delay:.1s">
+      <div class="content-scroll" id="lesson-content">
+        <!-- Loading skeleton -->
+        <div class="full-loader" id="content-loader">
+          <div class="big-spinner"></div>
+          <div class="loading-text">Generating your personalized lesson…</div>
+          <div style="font-size:11px;color:var(--text-muted)">This may take 10–20 seconds ☕</div>
         </div>
+      </div>
+      <div class="content-footer">
+        <div class="lesson-progress">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px" id="progress-label">Reading…</div>
+          <div class="lesson-progress-bar">
+            <div class="lesson-progress-fill" id="lesson-prog-fill"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <a href="index.html" class="btn btn-ghost btn-sm">← Back</a>
+          <button class="btn btn-primary btn-sm" id="btn-next-lesson" style="display:none" onclick="loadNewLesson()">
+            Next Lesson →
+          </button>
+        </div>
+      </div>
     </div>
 
-    <script>
-        const API_BASE_URL = 'https://ai-neuro-backend.onrender.com';
+    <!-- Right sidebar -->
+    <div class="lesson-sidebar">
 
-        // Get user from localStorage
-        const userStr = localStorage.getItem('neurolearn_user');
-        const currentUser = userStr ? JSON.parse(userStr) : null;
-        if (!currentUser || !currentUser.user_id) {
-            window.location.href = 'login.html';
-        }
-        
-        const AUTH_TOKEN = currentUser?.id_token;
+      <!-- Quiz -->
+      <div class="quiz-card anim-rise" style="--delay:.15s">
+        <div class="quiz-head">
+          <div class="quiz-head-title">📝 Knowledge Check</div>
+          <div class="quiz-counter" id="quiz-counter">Question 1 / 3</div>
+        </div>
+        <div class="quiz-body" id="quiz-body">
+          <div class="full-loader" style="padding:20px 0">
+            <div class="big-spinner" style="width:24px;height:24px;border-width:2px"></div>
+            <div class="loading-text" style="font-size:12px">Loading quiz…</div>
+          </div>
+        </div>
+      </div>
 
-        // Get URL params
-        const params     = new URLSearchParams(window.location.search);
-        const topic      = params.get('topic')      || 'Dictionary Methods & Comprehensions';
-        const difficulty = params.get('difficulty') || 'intermediate';
+      <!-- Score card -->
+      <div class="score-card anim-rise" style="--delay:.2s" id="score-card">
+        <div style="font-size:13px;font-weight:700;margin-bottom:14px">Session Score</div>
+        <div class="score-ring">
+          <svg width="90" height="90" viewBox="0 0 90 90">
+            <circle cx="45" cy="45" r="38" fill="none" stroke="var(--surface-3)" stroke-width="8"/>
+            <circle cx="45" cy="45" r="38" fill="none" stroke="url(#scoreGrad)" stroke-width="8"
+              stroke-dasharray="238" stroke-dashoffset="238" stroke-linecap="round"
+              id="score-circle" style="transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset 1s ease"/>
+            <defs>
+              <linearGradient id="scoreGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#7c5cfc"/>
+                <stop offset="100%" stop-color="#00d4aa"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="score-ring-inner">
+            <span class="score-big" id="score-pct">0%</span>
+            <span class="score-sub">accuracy</span>
+          </div>
+        </div>
+        <div class="score-label" id="score-breakdown">Answer the quiz →</div>
+      </div>
 
-        let lessonData   = null;
-        let quizScore    = 0;
-        let quizAnswered = 0;
+    </div>
+  </div>
+</div>
 
-        window.addEventListener('load', generateLesson);
+<!-- AI floating badge -->
+<div class="ai-badge" onclick="loadNewLesson()" title="Generate a new lesson">
+  🤖 New Lesson
+</div>
 
-        async function generateLesson() {
-            // Show loading state
-            document.getElementById('lesson-card').innerHTML = `
-                <div class="ai-loading">
-                    <div class="ai-loading-spinner"></div>
-                    <p>🧠 Gemini AI is generating your lesson...</p>
-                    <small>Personalizing content for your learning style</small>
-                </div>
-            `;
+<script src="app.js"></script>
+<script>
+// ═══════════════════════════════════════
+// LESSON ENGINE
+// ═══════════════════════════════════════
 
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/v1/adaptation/generate-lesson`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${AUTH_TOKEN}`
-                    },
-                    body: JSON.stringify({
-                        user_id: currentUser.user_id,
-                        topic: topic,
-                        learning_style: currentUser.learning_style || 'visual',
-                        difficulty: difficulty,
-                        user_name: currentUser.name?.split(' ')[0] || 'Student',
-                        cognitive_capacity: currentUser.cognitive_capacity || 7.0
-                    })
-                });
+const params     = new URLSearchParams(window.location.search);
+const TOPIC      = params.get('topic')    || 'Python Basics';
+const DIFFICULTY = params.get('difficulty') || 'intermediate';
+const API_LESSON = 'https://ai-neuro-backend.onrender.com';
 
-                if (!response.ok) throw new Error('Generation failed');
+// Set UI meta
+document.getElementById('lesson-title').textContent = TOPIC;
+document.getElementById('lesson-diff-chip').textContent = capitalize(DIFFICULTY);
+const diffColors = {beginner:'chip-teal', intermediate:'chip-purple', advanced:'chip-warn'};
+document.getElementById('lesson-diff-chip').className = 'chip ' + (diffColors[DIFFICULTY]||'chip-purple');
 
-                const result = await response.json();
-                lessonData = result.data;
-                renderLesson(lessonData);
+// ── Quiz state ──
+let quizData      = [];
+let currentQ      = 0;
+let correctCount  = 0;
+let answered      = false;
 
-            } catch (error) {
-                console.error('Lesson generation error:', error);
-                renderError();
-            }
-        }
+// ── Mobile sidebar from lesson page ──
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebar-overlay');
+document.getElementById('hamburger').addEventListener('click',()=>{ sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+overlay.addEventListener('click',()=>{ sidebar.classList.remove('open'); overlay.classList.remove('open'); });
 
-        function renderLesson(lesson) {
-            const card = document.getElementById('lesson-card');
+// ─────────────────────────────────────
+// LESSON CONTENT
+// ─────────────────────────────────────
+async function loadLesson() {
+  const user = getCurrentUser?.();
+  const userId = user?.user_id || 'guest_demo';
 
-            const sectionsHTML = lesson.sections.map(section => `
-                <div class="section-block">
-                    <h3>${section.heading}</h3>
-                    <p>${section.content}</p>
-                    ${section.code_example ? `
-                        <div class="code-block">
-                            <span class="code-label">Python</span>
-                            <pre>${escapeHtml(section.code_example)}</pre>
-                        </div>` : ''}
-                    ${section.key_point ? `
-                        <div class="key-point">${section.key_point}</div>` : ''}
-                </div>
-            `).join('');
+  try {
+    const authHeader = user?.id_token ? { 'Authorization':'Bearer '+user.id_token } : {};
+    const res = await fetch(`${API_LESSON}/api/v1/adaptation/generate-lesson`, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', ...authHeader },
+      body:JSON.stringify({
+        user_id:userId, topic:TOPIC, difficulty:DIFFICULTY,
+        learning_style:'visual', cognitive_load_level:7
+      })
+    });
 
-            const quizHTML = lesson.quiz.map((q, i) => `
-                <div class="quiz-question" id="q-${i}">
-                    <div class="question-text">Q${i + 1}. ${q.question}</div>
-                    <div class="options">
-                        ${q.options.map((opt, j) => `
-                            <button class="option-btn"
-                                onclick="answerQuiz(${i}, ${j})"
-                                id="opt-${i}-${j}">
-                                ${String.fromCharCode(65 + j)}. ${opt}
-                            </button>
-                        `).join('')}
-                    </div>
-                    <div class="feedback-box" id="feedback-${i}"></div>
-                </div>
-            `).join('');
+    if (!res.ok) throw new Error('API error '+res.status);
+    const data = await res.json();
+    renderLesson(data.data || data);
+    loadQuiz(data.data || data);
+  } catch (err) {
+    console.warn('API offline, showing demo content:', err.message);
+    renderDemoLesson();
+    renderDemoQuiz();
+  }
+}
 
-            card.innerHTML = `
-                <div class="lesson-header">
-                    <div class="lesson-meta">
-                        <span class="lesson-tag">🤖 AI Generated</span>
-                        <span class="lesson-tag">${lesson.duration_minutes} min</span>
-                        <span class="lesson-tag">${difficulty}</span>
-                        <span class="lesson-tag">${currentUser.learning_style || 'visual'} learner</span>
-                    </div>
-                    <h1>${lesson.title}</h1>
-                    <p>${lesson.module}</p>
-                    <div class="objectives">
-                        <h4>LEARNING OBJECTIVES</h4>
-                        <ul>${lesson.objectives.map(o => `<li>${o}</li>`).join('')}</ul>
-                    </div>
-                </div>
+function renderLesson(data) {
+  const content = data.content || data.lesson_content || '';
+  const sections = data.sections || [];
+  const duration = data.estimated_duration_minutes || data.duration_minutes || '~20';
 
-                <div class="lesson-body">
-                    ${sectionsHTML}
+  document.getElementById('lesson-duration').textContent = `~${duration} min`;
 
-                    <div class="summary-box">
-                        <h3>📝 Summary</h3>
-                        <p>${lesson.summary}</p>
-                        <div class="next-topic-badge">→ Next: ${lesson.next_topic}</div>
-                    </div>
+  let html = '';
+  if(sections.length) {
+    sections.forEach(s => {
+      html += `<h2>${s.title || s.section_title || ''}</h2>`;
+      html += `<p>${s.content || s.text || ''}</p>`;
+      if(s.code_example || s.code) html += `<pre>${escHtml(s.code_example || s.code)}</pre>`;
+    });
+  } else if(content) {
+    html = `<p>${content.replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>')}</p>`;
+  } else {
+    renderDemoLesson(); return;
+  }
 
-                    <div class="quiz-section">
-                        <h2>🧪 Knowledge Check</h2>
-                        ${quizHTML}
-                    </div>
-                </div>
+  document.getElementById('lesson-content').innerHTML = html;
+  animateProgress(75);
+  document.getElementById('btn-next-lesson').style.display = 'inline-flex';
+  document.getElementById('progress-label').textContent = 'Lesson loaded ✓';
+}
 
-                <div class="lesson-actions">
-                    <div class="score-badge">
-                        Quiz Score: <span id="score-display">0</span> / ${lesson.quiz.length}
-                    </div>
-                    <button class="complete-btn" onclick="markComplete()" id="complete-btn">
-                        Mark Complete ✓
-                    </button>
-                </div>
-            `;
-        }
+function renderDemoLesson() {
+  const demos = {
+    beginner:`
+<h2>🐍 Introduction to ${TOPIC}</h2>
+<p>Welcome to your personalized AI lesson! This lesson covers the foundational concepts you need to get started.</p>
+<h3>What are Variables?</h3>
+<p>Variables are containers for storing data values. In Python, you don't need to declare a variable before using it.</p>
+<pre>name = "Alice"
+age = 25
+score = 98.5
+print(f"Hello {name}, you scored {score}!")</pre>
+<h3>Data Types</h3>
+<p>Python has several built-in data types:</p>
+<ul>
+  <li><code>str</code> — text, e.g. <code>"Hello"</code></li>
+  <li><code>int</code> — integers, e.g. <code>42</code></li>
+  <li><code>float</code> — decimals, e.g. <code>3.14</code></li>
+  <li><code>bool</code> — <code>True</code> or <code>False</code></li>
+  <li><code>list</code> — ordered collections, e.g. <code>[1, 2, 3]</code></li>
+</ul>
+<h2>✅ Key Takeaways</h2>
+<p>You've learned about variables and data types — the building blocks of any Python program. Keep going!</p>`,
+    intermediate:`
+<h2>📦 ${TOPIC} — Deep Dive</h2>
+<p>This lesson explores intermediate concepts that help you write cleaner, more efficient Python code.</p>
+<h3>List Comprehensions</h3>
+<p>A concise way to create lists based on an existing list or range:</p>
+<pre>squares = [x**2 for x in range(10) if x % 2 == 0]
+print(squares)  # [0, 4, 16, 36, 64]</pre>
+<h3>Dictionary Methods</h3>
+<p>Python dictionaries provide powerful methods for data manipulation:</p>
+<pre>data = {"a": 1, "b": 2, "c": 3}
+keys   = list(data.keys())    # ['a', 'b', 'c']
+values = list(data.values())  # [1, 2, 3]
+items  = list(data.items())   # [('a',1), ('b',2), ('c',3)]</pre>
+<h3>Lambda Functions</h3>
+<p>Small anonymous functions defined with the <code>lambda</code> keyword:</p>
+<pre>double = lambda x: x * 2
+sorted_data = sorted(items, key=lambda item: item[1], reverse=True)</pre>
+<h2>✅ Summary</h2>
+<p>You've mastered list comprehensions, dictionary methods, and lambda functions — powerful tools for writing Pythonic code!</p>`,
+    advanced:`
+<h2>🚀 Advanced ${TOPIC}</h2>
+<p>This lesson covers advanced patterns used by professional Python developers.</p>
+<h3>Decorators</h3>
+<p>Decorators wrap a function to extend its behavior without modifying its source code:</p>
+<pre>import time
 
-        async function answerQuiz(questionIndex, answerIndex) {
-            const q = lessonData.quiz[questionIndex];
+def timer(func):
+    def wrapper(*args, **kwargs):
+        start = time.perf_counter()
+        result = func(*args, **kwargs)
+        end   = time.perf_counter()
+        print(f"{func.__name__} took {end-start:.4f}s")
+        return result
+    return wrapper
 
-            // Disable all options for this question
-            document.querySelectorAll(`#q-${questionIndex} .option-btn`)
-                .forEach(btn => btn.disabled = true);
+@timer
+def heavy_computation():
+    return sum(range(10_000_000))</pre>
+<h3>Context Managers</h3>
+<p>The <code>with</code> statement ensures proper resource management:</p>
+<pre>from contextlib import contextmanager
 
-            const isCorrect   = answerIndex === q.correct;
-            const questionEl  = document.getElementById(`q-${questionIndex}`);
-            const feedbackEl  = document.getElementById(`feedback-${questionIndex}`);
-            const selectedBtn = document.getElementById(`opt-${questionIndex}-${answerIndex}`);
+@contextmanager
+def managed_resource():
+    print("Acquiring resource")
+    yield "resource"
+    print("Releasing resource")
 
-            selectedBtn.classList.add(isCorrect ? 'selected-correct' : 'selected-incorrect');
+with managed_resource() as r:
+    print(f"Using {r}")</pre>
+<h2>✅ Summary</h2>
+<p>You've learned decorators and context managers — the patterns that separate junior from senior Python developers!</p>`
+  };
 
-            if (!isCorrect) {
-                document.getElementById(`opt-${questionIndex}-${q.correct}`)
-                    .classList.add('reveal-correct');
-            }
+  document.getElementById('lesson-content').innerHTML = demos[DIFFICULTY] || demos.intermediate;
+  animateProgress(75);
+  document.getElementById('btn-next-lesson').style.display = 'inline-flex';
+  document.getElementById('progress-label').textContent = 'Demo lesson loaded';
+  document.getElementById('lesson-duration').textContent = '~15 min';
+}
 
-            questionEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+// ─────────────────────────────────────
+// QUIZ ENGINE
+// ─────────────────────────────────────
+const demoQuizzes = {
+  beginner:[
+    { q:'Which keyword is used to assign a value to a variable in Python?', opts:['var','let','=','define'], correct:2 },
+    { q:'What is the output of `print(type(42))`?', opts:['<class "int">','<class "str">','42','integer'], correct:0 },
+    { q:'Which of these is a valid Python list?', opts:['(1,2,3)','{1,2,3}','[1,2,3]','<1,2,3>'], correct:2 },
+  ],
+  intermediate:[
+    { q:'What does `[x**2 for x in range(5)]` produce?', opts:['[0,1,4,9,16]','[1,4,9,16,25]','[0,2,4,6,8]','Error'], correct:0 },
+    { q:'Which method returns all key-value pairs from a dictionary?', opts:['.keys()','.values()','.items()','.pairs()'], correct:2 },
+    { q:'What does `lambda x: x*2` create?', opts:['A class','A loop','An anonymous function','A generator'], correct:2 },
+  ],
+  advanced:[
+    { q:'What is a decorator in Python?', opts:['A UI component','A function that wraps another function','An HTML tag','A data type'], correct:1 },
+    { q:'Which module provides the `contextmanager` decorator?', opts:['os','sys','contextlib','functools'], correct:2 },
+    { q:'What does `@property` decorator do?', opts:['Makes a method a generator','Allows method access like attribute','Creates a class method','Validates input'], correct:1 },
+  ]
+};
 
-            if (isCorrect) quizScore++;
-            quizAnswered++;
+function loadQuiz(data) {
+  quizData = data?.quiz_questions || data?.questions || demoQuizzes[DIFFICULTY] || demoQuizzes.intermediate;
+  if (!quizData.length) { quizData = demoQuizzes[DIFFICULTY] || demoQuizzes.intermediate; }
+  currentQ = 0; correctCount = 0; answered = false;
+  renderQuestion();
+}
 
-            const scoreEl = document.getElementById('score-display');
-            if (scoreEl) scoreEl.textContent = quizScore;
+function renderDemoQuiz() {
+  quizData = demoQuizzes[DIFFICULTY] || demoQuizzes.intermediate;
+  currentQ = 0; correctCount = 0; answered = false;
+  renderQuestion();
+}
 
-            // Show AI feedback
-            feedbackEl.textContent = '🤖 Getting personalized feedback...';
-            feedbackEl.classList.add('visible');
+function renderQuestion() {
+  const q = quizData[currentQ];
+  if(!q) { showFinalScore(); return; }
 
-            try {
-                const res = await fetch(`${API_BASE_URL}/api/v1/adaptation/quiz-feedback`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${AUTH_TOKEN}`
-                    },
-                    body: JSON.stringify({
-                        question: q.question,
-                        user_answer: answerIndex,
-                        correct_answer: q.correct,
-                        explanation: q.explanation,
-                        learning_style: currentUser.learning_style || 'visual'
-                    })
-                });
+  const opts = q.opts || q.options || q.choices || [];
+  const correctIdx = q.correct ?? q.correct_option ?? q.answer_index ?? 0;
+  answered = false;
 
-                const data = await res.json();
-                feedbackEl.textContent = data.data.feedback;
+  document.getElementById('quiz-counter').textContent = `Question ${currentQ+1} / ${quizData.length}`;
 
-            } catch {
-                feedbackEl.textContent = isCorrect
-                    ? `✅ Correct! ${q.explanation}`
-                    : `❌ ${q.explanation}`;
-            }
-        }
+  document.getElementById('quiz-body').innerHTML = `
+    <p class="question-text">${q.q || q.question || q.text}</p>
+    <div class="options-list">
+      ${opts.map((o,i)=>`<button class="opt-btn" data-idx="${i}" onclick="selectOpt(this,${i},${correctIdx})">${o}</button>`).join('')}
+    </div>
+    <div class="quiz-feedback" id="quiz-fb"></div>
+    <div class="quiz-action">
+      <button class="btn btn-ghost btn-sm" style="display:none" id="btn-next-q" onclick="nextQuestion()">Next Question →</button>
+    </div>
+  `;
+}
 
-        async function markComplete() {
-            const btn = document.getElementById('complete-btn');
-            btn.disabled = true;
-            btn.textContent = 'Saving...';
+function selectOpt(el, idx, correct) {
+  if(answered) return;
+  answered = true;
+  document.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);
 
-            try {
-                await fetch(`${API_BASE_URL}/api/v1/assessment/analytics`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${AUTH_TOKEN}`
-                    },
-                    body: JSON.stringify({
-                        user_id: currentUser.user_id,
-                        session_id: `session_${Date.now()}`,
-                        engagement_score: 0.85,
-                        focus_level: 0.80,
-                        interaction_count: quizAnswered,
-                        time_on_task_minutes: lessonData?.duration_minutes || 30,
-                        completion_rate: 1.0,
-                        error_rate: quizAnswered > 0
-                            ? (quizAnswered - quizScore) / quizAnswered
-                            : 0,
-                        help_requests: 0
-                    })
-                });
-            } catch (e) {
-                console.log('Analytics error:', e);
-            }
+  const fb = document.getElementById('quiz-fb');
+  fb.classList.add('show');
 
-            btn.textContent = '✅ Completed!';
-            btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+  if(idx===correct) {
+    el.classList.add('correct');
+    fb.classList.add('fb-correct');
+    fb.textContent = '✅ Correct! Great job!';
+    correctCount++;
+  } else {
+    el.classList.add('wrong');
+    document.querySelectorAll('.opt-btn')[correct].classList.add('correct');
+    fb.classList.add('fb-wrong');
+    fb.textContent = `❌ Not quite. The correct answer is: ${document.querySelectorAll('.opt-btn')[correct].textContent}`;
+  }
 
-            setTimeout(() => window.location.href = 'index.html', 1500);
-        }
+  updateScore();
+  const nextBtn = document.getElementById('btn-next-q');
+  if(nextBtn) nextBtn.style.display='inline-flex';
+}
 
-        function renderError() {
-            document.getElementById('lesson-card').innerHTML = `
-                <div class="ai-loading">
-                    <p style="color:#ef4444; font-size:18px;">⚠️ Failed to generate lesson</p>
-                    <small>Check your GEMINI_API_KEY in Render environment variables</small>
-                    <button class="error-btn" onclick="generateLesson()">Try Again</button>
-                </div>
-            `;
-        }
+function nextQuestion() {
+  currentQ++;
+  if(currentQ >= quizData.length) { showFinalScore(); return; }
+  renderQuestion();
+}
 
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;');
-        }
-    </script>
+function showFinalScore() {
+  const pct = quizData.length ? Math.round((correctCount/quizData.length)*100) : 0;
+  document.getElementById('quiz-body').innerHTML = `
+    <div style="text-align:center;padding:20px 0">
+      <div style="font-size:36px;font-weight:800;margin-bottom:8px">${pct}%</div>
+      <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">${correctCount} of ${quizData.length} correct</div>
+      <div style="font-size:12px;color:${pct>=70?'var(--brand-teal)':'#f05f5f'};margin-bottom:20px">
+        ${pct>=70?'🎉 Excellent work!':'📚 Keep practicing!'}
+      </div>
+      <button class="btn btn-primary btn-sm" style="width:100%" onclick="loadNewLesson()">New Lesson →</button>
+      <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px" onclick="restartQuiz()">Retry Quiz</button>
+    </div>`;
+
+  sendAnalytics(pct/100);
+  showToast(`Quiz complete! You scored ${pct}% 🎯`, pct>=70?'success':'info');
+}
+
+function restartQuiz() {
+  currentQ=0; correctCount=0; answered=false; renderQuestion();
+}
+
+function updateScore() {
+  const pct = quizData.length ? (correctCount/quizData.length)*100 : 0;
+  document.getElementById('score-pct').textContent = Math.round(pct)+'%';
+  document.getElementById('score-breakdown').textContent = `${correctCount} / ${quizData.length} correct`;
+  const circumference = 238;
+  const offset = circumference - (pct/100)*circumference;
+  document.getElementById('score-circle').style.strokeDashoffset = offset;
+}
+
+function loadNewLesson() {
+  const topics = ['Python Generators','Async Await in Python','Type Hints','Error Handling','File I/O','Regular Expressions'];
+  const t = topics[Math.floor(Math.random()*topics.length)];
+  window.location.href = `lesson.html?topic=${encodeURIComponent(t)}&difficulty=${DIFFICULTY}`;
+}
+
+async function sendAnalytics(score) {
+  try {
+    const user = getCurrentUser?.();
+    if(!user || user.is_guest) return;
+    await fetch(`${API_LESSON}/api/v1/assessment/analytics`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+user.id_token},
+      body:JSON.stringify({user_id:user.user_id,session_id:'s_'+Date.now(),topic:TOPIC,difficulty:DIFFICULTY,score_percentage:score,completed:true})
+    });
+  } catch {}
+}
+
+// Progress fill animation
+function animateProgress(pct) {
+  setTimeout(()=>{
+    document.getElementById('lesson-prog-fill').style.width = pct+'%';
+  },300);
+}
+
+// Reading progress (scroll-based)
+window.addEventListener('scroll',()=>{
+  const el = document.getElementById('lesson-content');
+  if(!el) return;
+  const scrolled = (window.scrollY/(document.body.scrollHeight-window.innerHeight))*100;
+  document.getElementById('lesson-prog-fill').style.width = Math.min(100,scrolled+10)+'%';
+});
+
+// Helpers
+function escHtml(t){ return t?.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') || ''; }
+function capitalize(s){ return s ? s[0].toUpperCase()+s.slice(1) : ''; }
+
+// Init
+loadLesson();
+</script>
 </body>
 </html>

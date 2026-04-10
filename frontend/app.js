@@ -1,32 +1,62 @@
+/* ========================================
+   NeuroLearn AI — app.js
+   Central authentication, API, and UI logic
+   ======================================== */
 
 const API_BASE_URL = 'https://ai-neuro-backend.onrender.com';
 
-// ========================================
-// AUTH - Get logged in user
-// ========================================
+// ═══════════════════════════════════════
+// TOAST NOTIFICATION SYSTEM
+// ═══════════════════════════════════════
+function showToast(message, type = 'info', duration = 4000) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <span>${message}</span>
+        <button class="toast-close" onclick="this.parentElement.remove()">✕</button>
+    `;
+
+    container.appendChild(toast);
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => toast.classList.add('show'));
+    });
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, duration);
+}
+window.showToast = showToast;
+
+// ═══════════════════════════════════════
+// AUTH — Session Management
+// ═══════════════════════════════════════
 
 function getCurrentUser() {
-    // Guest users are stored in sessionStorage (cleared when tab closes)
-    // Signed-in users are stored in localStorage (persisted)
-    const guestStr = sessionStorage.getItem('neurolearn_user');
-    if (guestStr) {
-        try { return JSON.parse(guestStr); } catch { sessionStorage.removeItem('neurolearn_user'); }
+    // Guest: sessionStorage (wiped on tab close)
+    // Signed-in: localStorage (persisted 24h)
+    const guestRaw = sessionStorage.getItem('neurolearn_user');
+    if (guestRaw) {
+        try { return JSON.parse(guestRaw); } catch { sessionStorage.removeItem('neurolearn_user'); }
     }
 
-    const userStr = localStorage.getItem('neurolearn_user');
-    if (!userStr) {
+    const raw = localStorage.getItem('neurolearn_user');
+    if (!raw) {
         if (!window.location.pathname.endsWith('login.html')) {
             window.location.href = 'login.html';
         }
         return null;
     }
+
     try {
-        const user = JSON.parse(userStr);
-        // Check if token is older than 24h as a basic precaution
-        const now = new Date().getTime();
-        if (user.last_login && (now - user.last_login > 24 * 60 * 60 * 1000)) {
-            logout();
-            return null;
+        const user = JSON.parse(raw);
+        const now = Date.now();
+        // Expire after 24 h
+        if (user.last_login && (now - user.last_login > 86400000)) {
+            logout(); return null;
         }
         return user;
     } catch {
@@ -35,181 +65,129 @@ function getCurrentUser() {
         return null;
     }
 }
+window.getCurrentUser = getCurrentUser;
 
 function logout() {
     localStorage.removeItem('neurolearn_user');
     sessionStorage.removeItem('neurolearn_user');
     window.location.href = 'login.html';
 }
+window.logout = logout;
 
-// Get current user — redirects to login if not authenticated
+// Initialise immediately
 const currentUser = getCurrentUser();
-const USER_ID = currentUser?.user_id; // Remove demo fallback for security
-const AUTH_TOKEN = currentUser?.id_token;
+const USER_ID     = currentUser?.user_id  || null;
+const AUTH_TOKEN  = currentUser?.id_token || null;
+const IS_GUEST    = currentUser?.is_guest ?? false;
 
-// ========================================
-// Initialize on load
-// ========================================
-
+// ═══════════════════════════════════════
+// DOM READY — Bootstrap everything
+// ═══════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
     setupUserProfile();
-    initializeNavigation();
-    initializeAnimations();
     wakeBackend();
 
-    // Wait 2s for backend to wake then load data
-    setTimeout(() => {
-        loadUserData();
-        loadRecommendations();
-    }, 2000);
+    if (!IS_GUEST) {
+        setTimeout(() => {
+            loadUserData();
+            loadRecommendations();
+        }, 1800); // give backend time to wake
+    } else {
+        showFallbackData();
+    }
 });
 
-// ========================================
-// Setup sidebar with real user data
-// ========================================
-
+// ═══════════════════════════════════════
+// USER PROFILE — sidebar & header
+// ═══════════════════════════════════════
 function setupUserProfile() {
     if (!currentUser) return;
 
-    // Show guest banner if guest
-    if (currentUser.is_guest) {
+    // Guest banner
+    if (IS_GUEST) {
         const banner = document.createElement('div');
-        banner.style.cssText = 'background:#fff8e1;border-bottom:1px solid #ffe082;padding:8px 20px;font-size:12px;color:#795548;display:flex;align-items:center;gap:8px;position:fixed;top:0;left:0;right:0;z-index:999;';
-        banner.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> <span><b>Guest Mode</b> — No data will be saved. <a href="login.html" style="color:#4285f4;font-weight:600;">Sign in with Google</a> to save your progress.</span>`;
+        banner.className = 'guest-banner';
+        banner.innerHTML = `
+            ⚠️ <b>Guest Mode</b> — No data is saved. Your session will be lost when this tab closes.
+            <a href="login.html">Sign in with Google</a> to save progress.
+        `;
         document.body.prepend(banner);
     }
 
-    // Update avatar — use Google profile photo if available
-    const avatarEl = document.querySelector('.user-avatar');
+    // Sidebar avatar
+    const avatarEl = document.getElementById('user-avatar');
     if (avatarEl) {
         if (currentUser.avatar) {
-            avatarEl.innerHTML = `
-                <img src="${currentUser.avatar}"
-                    style="width:40px;height:40px;border-radius:50%;object-fit:cover;"
-                    alt="avatar"
-                    onerror="this.outerHTML='<span>${getInitials(currentUser.name)}</span>'">
-            `;
+            avatarEl.innerHTML = `<img src="${currentUser.avatar}" alt="avatar"
+                onerror="this.outerHTML='<span>${getInitials(currentUser.name)}</span>'">`;
         } else {
             avatarEl.innerHTML = `<span>${getInitials(currentUser.name)}</span>`;
         }
     }
 
-    // Update sidebar name
-    const nameEl = document.querySelector('.user-name');
-    if (nameEl) nameEl.textContent = currentUser.name || 'User';
+    const nameEl    = document.getElementById('user-name');
+    const emailEl   = document.getElementById('user-email');
+    const initialsEl = document.getElementById('user-initials');
+    const titleEl   = document.getElementById('page-title');
 
-    // Update page title with first name
-    const titleEl = document.querySelector('.page-title');
+    if (nameEl)    nameEl.textContent  = currentUser.name  || 'User';
+    if (emailEl)   emailEl.textContent = currentUser.email || '';
+    if (initialsEl) initialsEl.textContent = getInitials(currentUser.name);
+
     const firstName = currentUser.name?.split(' ')[0] || 'there';
     if (titleEl) titleEl.textContent = `Welcome back, ${firstName} 👋`;
 }
 
 function getInitials(name) {
-    if (!name) return 'U';
+    if (!name) return '?';
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 }
 
-// ========================================
-// Wake backend (free tier cold start)
-// ========================================
-
+// ═══════════════════════════════════════
+// BACKEND HEALTH CHECK (cold-start wake)
+// ═══════════════════════════════════════
 async function wakeBackend() {
     try {
-        await fetch(`${API_BASE_URL}/health`);
-        console.log('Backend is awake');
-    } catch (e) {
-        console.log('Backend waking up...');
+        const res = await fetch(`${API_BASE_URL}/health`, { signal: AbortSignal.timeout(8000) });
+        if (res.ok) console.log('%c✅ Backend online', 'color:#00d4aa;font-weight:bold');
+    } catch {
+        console.warn('Backend offline or waking up…');
     }
 }
 
-// ========================================
-// Navigation
-// ========================================
-
-function initializeNavigation() {
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
-            navItems.forEach(nav => nav.classList.remove('active'));
-            item.classList.add('active');
-            const href = item.getAttribute('href');
-            navigateToPage(href);
-        });
-    });
-}
-
-function navigateToPage(page) {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    console.log('Navigating to:', page);
-}
-
-// ========================================
-// Scroll animations
-// ========================================
-
-function initializeAnimations() {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    }, { threshold: 0.1 });
-
-    document.querySelectorAll('.card, .stat-card').forEach(card => {
-        observer.observe(card);
-    });
-}
-
-// ========================================
-// Load user data from API
-// ========================================
-
+// ═══════════════════════════════════════
+// LOAD USER DATA
+// ═══════════════════════════════════════
 async function loadUserData() {
-    // Skip API call for guests
-    if (currentUser?.is_guest) {
-        showFallbackData();
-        return;
-    }
-
+    if (!USER_ID) { showFallbackData(); return; }
     try {
         showLoadingState();
-
-        const response = await fetch(`${API_BASE_URL}/api/v1/users/${USER_ID}`, {
-            method: 'GET',
-            headers: { 
+        const res = await fetch(`${API_BASE_URL}/api/v1/users/${USER_ID}`, {
+            headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${AUTH_TOKEN}`
+                ...(AUTH_TOKEN ? { 'Authorization': `Bearer ${AUTH_TOKEN}` } : {})
             }
         });
-
-        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-
-        const result = await response.json();
-        updateDashboard(result.data);
-
-    } catch (error) {
-        console.error('Error loading user data:', error);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const result = await res.json();
+        updateDashboard(result.data || result);
+    } catch (err) {
+        console.warn('loadUserData failed:', err.message);
         showFallbackData();
     }
 }
 
-// ========================================
-// Load recommendations from API
-// ========================================
-
+// ═══════════════════════════════════════
+// LOAD RECOMMENDATIONS
+// ═══════════════════════════════════════
 async function loadRecommendations() {
-    // Skip API call for guests — static recommendations only
-    if (currentUser?.is_guest) return;
-
+    if (!USER_ID || IS_GUEST) return;
     try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/adaptation/recommend-content`, {
+        const res = await fetch(`${API_BASE_URL}/api/v1/adaptation/recommend-content`, {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${AUTH_TOKEN}`
+                ...(AUTH_TOKEN ? { 'Authorization': `Bearer ${AUTH_TOKEN}` } : {})
             },
             body: JSON.stringify({
                 user_id: USER_ID,
@@ -222,207 +200,124 @@ async function loadRecommendations() {
                 completed_content: []
             })
         });
-
-        if (!response.ok) {
-            const err = await response.json();
-            console.error('Recommendations error:', JSON.stringify(err, null, 2));
-            throw new Error(`HTTP error: ${response.status}`);
-        }
-
-        const result = await response.json();
-        updateRecommendations(result.data);
-
-    } catch (error) {
-        console.error('Error loading recommendations:', error);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const result = await res.json();
+        updateRecommendations(result.data || result.recommendations || []);
+    } catch (err) {
+        console.warn('loadRecommendations failed:', err.message);
     }
 }
 
-// ========================================
-// Update dashboard with API data
-// ========================================
-
+// ═══════════════════════════════════════
+// DASHBOARD UPDATE
+// ═══════════════════════════════════════
 function updateDashboard(data) {
-    if (!data) return;
+    if (!data) { showFallbackData(); return; }
 
-    // Stat cards
+    // Animated counter helper
+    const animateCount = (el, target, suffix = '') => {
+        if (!el) return;
+        const start = 0;
+        const dur   = 1200;
+        const step  = (ts, startTs) => {
+            const pct  = Math.min((ts - startTs) / dur, 1);
+            const ease = 1 - Math.pow(1 - pct, 3);
+            el.textContent = Math.round(start + (target - start) * ease) + suffix;
+            if (pct < 1) requestAnimationFrame(ts2 => step(ts2, startTs));
+        };
+        requestAnimationFrame(ts => step(ts, ts));
+    };
+
     if (data.sessions_completed !== undefined) {
-        const el = document.querySelector('.stat-card:nth-child(1) .stat-value');
-        if (el) el.textContent = data.sessions_completed;
+        animateCount(document.getElementById('stat-sessions'), data.sessions_completed);
     }
-
     if (data.average_score !== undefined) {
-        const el = document.querySelector('.stat-card:nth-child(2) .stat-value');
-        if (el) el.innerHTML = `${(data.average_score * 100).toFixed(1)}<span class="stat-unit">%</span>`;
+        const el = document.getElementById('stat-score');
+        if (el) el.innerHTML = `${(data.average_score * 100).toFixed(1)}<span style="font-size:18px;color:var(--text-muted)">%</span>`;
     }
-
     if (data.engagement_level !== undefined) {
-        const el = document.querySelector('.stat-card:nth-child(3) .stat-value');
-        if (el) el.innerHTML = `${(data.engagement_level * 100).toFixed(0)}<span class="stat-unit">%</span>`;
+        const el = document.getElementById('stat-engagement');
+        if (el) el.innerHTML = `${(data.engagement_level * 100).toFixed(0)}<span style="font-size:18px;color:var(--text-muted)">%</span>`;
     }
-
     if (data.streak_days !== undefined) {
-        const el = document.querySelector('.stat-card:nth-child(4) .stat-value');
-        if (el) el.innerHTML = `🔥 <span>${data.streak_days}</span>`;
+        animateCount(document.getElementById('stat-streak'), data.streak_days);
+        const chip = document.getElementById('streak-chip');
+        if (chip) chip.textContent = `${data.streak_days} days`;
     }
 
     // Cognitive profile
     if (data.learning_style) {
-        const el = document.querySelector('.profile-stat:nth-child(1) .profile-stat-value');
+        const el = document.getElementById('profile-style');
         if (el) el.textContent = capitalize(data.learning_style);
     }
-
     if (data.cognitive_load_capacity) {
-        const el = document.querySelector('.profile-stat:nth-child(2) .profile-stat-value');
-        if (el) el.textContent = `${data.cognitive_load_capacity}/10`;
+        const el = document.getElementById('profile-capacity');
+        if (el) el.textContent = `${data.cognitive_load_capacity} / 10`;
     }
-
     if (data.processing_speed) {
-        const el = document.querySelector('.profile-stat:nth-child(3) .profile-stat-value');
-        if (el) el.textContent = data.processing_speed;
+        const el = document.getElementById('profile-speed');
+        if (el) el.textContent = capitalize(data.processing_speed);
     }
-
     if (data.working_memory) {
-        const el = document.querySelector('.profile-stat:nth-child(4) .profile-stat-value');
-        if (el) el.textContent = data.working_memory;
+        const el = document.getElementById('profile-memory');
+        if (el) el.textContent = capitalize(data.working_memory);
     }
 }
 
-function updateRecommendations(recommendations) {
-    const list = document.querySelector('.recommendation-list');
-    if (!list || !recommendations?.length) return;
+// ═══════════════════════════════════════
+// RECOMMENDATIONS UPDATE
+// ═══════════════════════════════════════
+function updateRecommendations(recs) {
+    const list = document.getElementById('rec-list');
+    if (!list || !recs?.length) return;
 
-    const types = ['video', 'text', 'code'];
+    const colors = ['c1', 'c2', 'c3'];
     list.innerHTML = '';
-
-    recommendations.slice(0, 3).forEach((rec, index) => {
+    recs.slice(0, 3).forEach((rec, i) => {
         const item = document.createElement('div');
-        item.className = 'recommendation-item';
+        item.className = 'rec-item';
         item.innerHTML = `
-            <div class="rec-thumbnail ${types[index % types.length]}"></div>
-            <div class="rec-content">
-                <h3 class="rec-title">${rec.title || rec.content_id}</h3>
-                <div class="rec-meta">
-                    <span class="rec-type">${rec.content_type || 'Interactive'} • ${rec.duration_minutes || 45} min</span>
-                    <span class="rec-match">${Math.round((rec.score || 0.9) * 100)}% match</span>
-                </div>
+            <div class="rec-dot ${colors[i % 3]}"></div>
+            <div class="rec-info">
+                <div class="rec-name">${rec.title || rec.content_id || 'Recommended Lesson'}</div>
+                <div class="rec-meta">${rec.content_type || 'Interactive'} • ${rec.duration_minutes || 45} min</div>
             </div>
+            <span class="rec-match">${Math.round((rec.score || 0.87) * 100)}%</span>
         `;
         item.addEventListener('click', () => {
-            window.location.href = `lesson.html?topic=${encodeURIComponent(rec.title || rec.content_id)}&difficulty=${rec.difficulty_level || 'intermediate'}`;
+            window.location.href = `lesson.html?topic=${encodeURIComponent(rec.title || 'Lesson')}&difficulty=${rec.difficulty_level || 'intermediate'}`;
         });
         list.appendChild(item);
     });
 }
 
-// ========================================
-// Loading states
-// ========================================
-
+// ═══════════════════════════════════════
+// LOADING STATES
+// ═══════════════════════════════════════
 function showLoadingState() {
-    document.querySelectorAll('.stat-value').forEach(el => {
-        el.style.opacity = '0.4';
+    ['stat-sessions','stat-score','stat-engagement','stat-streak'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.style.opacity = '0.3'; el.style.filter = 'blur(4px)'; }
     });
 }
 
 function showFallbackData() {
-    document.querySelectorAll('.stat-value').forEach(el => {
-        el.style.opacity = '1';
-    });
-    console.log('Using static fallback data');
-}
-
-// ========================================
-// Progress bar animations
-// ========================================
-
-function animateProgressBars() {
-    const progressFills = document.querySelectorAll('.progress-fill');
-    progressFills.forEach(fill => {
-        const width = fill.style.getPropertyValue('--width');
-        fill.style.width = '0%';
-        setTimeout(() => { fill.style.width = width; }, 100);
+    ['stat-sessions','stat-score','stat-engagement','stat-streak'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.style.opacity = '1'; el.style.filter = 'none'; }
     });
 }
 
-setTimeout(animateProgressBars, 500);
-
-// ========================================
-// Button handlers
-// ========================================
-
-// Export Data button
-document.querySelectorAll('.action-export').forEach(btn => {
-    btn.addEventListener('click', async () => {
-        if (currentUser?.is_guest) {
-            alert('⚠️ Guest Mode: Data export is only available for signed-in users.');
-            return;
-        }
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/v1/users/${USER_ID}/export`, {
-                headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` }
-            });
-            if (response.ok) {
-                const blob = await response.blob();
-                const url  = URL.createObjectURL(blob);
-                const a    = document.createElement('a');
-                a.href     = url;
-                a.download = `neurolearn-${USER_ID}-export.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-            } else {
-                alert('Export failed. Please try again later.');
-            }
-        } catch {
-            alert('Export coming soon!');
-        }
-    });
-});
-
-// Start Learning button
-document.getElementById('btn-start')?.addEventListener('click', async () => {
-    const btn = document.getElementById('btn-start');
-    const originalContent = btn.innerHTML;
-    try {
-        btn.disabled = true;
-        btn.innerHTML = 'Loading...';
-        
-        const response = await fetch(`${API_BASE_URL}/api/v1/adaptation/next-lesson`, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${AUTH_TOKEN}`
-            },
-            body: JSON.stringify({ user_id: USER_ID })
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            window.location.href = `lesson.html?topic=${encodeURIComponent(data.lesson_title)}&difficulty=${data.difficulty}`;
-        } else {
-            window.location.href = 'lesson.html';
-        }
-    } catch {
-        window.location.href = 'lesson.html';
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalContent;
-    }
-});
-
-// Stat card hover effects
-document.querySelectorAll('.stat-card').forEach(card => {
-    card.addEventListener('mouseenter', () => { card.style.transform = 'translateY(-8px)'; });
-    card.addEventListener('mouseleave', () => { card.style.transform = 'translateY(0)'; });
-});
-
-// ========================================
-// Helpers
-// ========================================
-
+// ═══════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════
 function capitalize(str) {
     if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-console.log('%c🧠 NeuroLearn AI Dashboard', 'color: #667eea; font-size: 20px; font-weight: bold;');
-console.log('%cDashboard loaded successfully!', 'color: #10b981; font-size: 14px;');
+// ═══════════════════════════════════════
+// CONSOLE BRANDING
+// ═══════════════════════════════════════
+console.log('%c🧠 NeuroLearn AI', 'color:#7c5cfc;font-size:22px;font-weight:800;');
+console.log(`%cUser: ${currentUser?.name || 'Guest'} | Mode: ${IS_GUEST ? 'Guest 👤' : 'Signed-in ✅'}`, 'color:#4f8ef7;font-size:13px;');

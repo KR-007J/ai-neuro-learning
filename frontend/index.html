@@ -1,893 +1,518 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeuroLearn AI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: #0f0f13;
-            color: #fff;
-            min-height: 100vh;
-        }
-
-        /* ── Layout ── */
-        .layout {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* ── Sidebar ── */
-        .sidebar {
-            width: 220px;
-            background: #16161d;
-            border-right: 1px solid #ffffff10;
-            display: flex;
-            flex-direction: column;
-            padding: 24px 16px;
-            position: fixed;
-            height: 100vh;
-            z-index: 100;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 12px;
-            margin-bottom: 32px;
-        }
-
-        .logo-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-        }
-
-        .logo-text {
-            font-size: 17px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #667eea, #a78bfa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .nav-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            flex: 1;
-        }
-
-        .nav-label {
-            font-size: 10px;
-            font-weight: 700;
-            color: #ffffff30;
-            letter-spacing: 0.1em;
-            padding: 0 12px;
-            margin: 16px 0 6px;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            border-radius: 10px;
-            color: #ffffff60;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.15s;
-            cursor: pointer;
-            border: none;
-            background: none;
-            width: 100%;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        .nav-item:hover {
-            background: #ffffff08;
-            color: #fff;
-        }
-
-        .nav-item.active {
-            background: linear-gradient(135deg, #667eea20, #764ba220);
-            color: #a78bfa;
-            border: 1px solid #667eea30;
-        }
-
-        .nav-item svg { flex-shrink: 0; }
-
-        .sidebar-bottom {
-            border-top: 1px solid #ffffff10;
-            padding-top: 16px;
-        }
-
-        .user-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            border-radius: 10px;
-            margin-bottom: 8px;
-        }
-
-        .avatar {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 700;
-            flex-shrink: 0;
-            overflow: hidden;
-        }
-
-        .avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .user-info { flex: 1; min-width: 0; }
-
-        .user-name {
-            font-size: 13px;
-            font-weight: 600;
-            color: #fff;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .user-email {
-            font-size: 11px;
-            color: #ffffff40;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .logout-btn {
-            width: 100%;
-            padding: 9px;
-            background: none;
-            border: 1px solid #ffffff15;
-            border-radius: 8px;
-            color: #ffffff40;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            transition: all 0.15s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-
-        .logout-btn:hover {
-            border-color: #ef444450;
-            color: #ef4444;
-            background: #ef444410;
-        }
-
-        /* ── Main ── */
-        .main {
-            margin-left: 220px;
-            flex: 1;
-            padding: 32px;
-            max-width: calc(100vw - 220px);
-        }
-
-        /* ── Header ── */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-        }
-
-        .header-left h1 {
-            font-size: 26px;
-            font-weight: 800;
-            margin-bottom: 4px;
-        }
-
-        .header-left p {
-            font-size: 14px;
-            color: #ffffff50;
-        }
-
-        .header-right {
-            display: flex;
-            gap: 10px;
-        }
-
-        /* ── Buttons ── */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            padding: 10px 18px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: all 0.15s;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            text-decoration: none;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            box-shadow: 0 4px 16px #667eea40;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px #667eea50;
-        }
-
-        .btn-ghost {
-            background: #ffffff08;
-            color: #ffffff70;
-            border: 1px solid #ffffff12;
-        }
-
-        .btn-ghost:hover {
-            background: #ffffff12;
-            color: #fff;
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        /* ── Stats ── */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 28px;
-        }
-
-        .stat-card {
-            background: #16161d;
-            border: 1px solid #ffffff0d;
-            border-radius: 14px;
-            padding: 20px;
-            transition: border-color 0.2s;
-        }
-
-        .stat-card:hover { border-color: #667eea30; }
-
-        .stat-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-        }
-
-        .stat-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-
-        .stat-trend {
-            font-size: 11px;
-            font-weight: 600;
-            padding: 3px 8px;
-            border-radius: 20px;
-            background: #10b98120;
-            color: #10b981;
-        }
-
-        .stat-value {
-            font-size: 30px;
-            font-weight: 800;
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: #ffffff40;
-            font-weight: 500;
-        }
-
-        /* ── Grid ── */
-        .content-grid {
-            display: grid;
-            grid-template-columns: 1.6fr 1fr;
-            gap: 20px;
-        }
-
-        /* ── Card ── */
-        .card {
-            background: #16161d;
-            border: 1px solid #ffffff0d;
-            border-radius: 16px;
-            overflow: hidden;
-        }
-
-        .card-head {
-            padding: 20px 24px 16px;
-            border-bottom: 1px solid #ffffff08;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .card-title {
-            font-size: 15px;
-            font-weight: 700;
-        }
-
-        .card-sub {
-            font-size: 12px;
-            color: #ffffff40;
-            margin-top: 2px;
-        }
-
-        .card-body { padding: 20px 24px; }
-
-        /* ── Modules ── */
-        .module-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .module-item {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 14px;
-            border-radius: 12px;
-            border: 1px solid #ffffff08;
-            cursor: pointer;
-            transition: all 0.15s;
-            background: #0f0f1300;
-        }
-
-        .module-item:hover:not(.locked) {
-            background: #667eea08;
-            border-color: #667eea30;
-        }
-
-        .module-item.locked {
-            opacity: 0.45;
-            cursor: not-allowed;
-        }
-
-        .module-status {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            font-size: 15px;
-        }
-
-        .module-status.done  { background: #10b98120; color: #10b981; border: 1px solid #10b98130; }
-        .module-status.active { background: #667eea20; color: #667eea; border: 1px solid #667eea30; }
-        .module-status.idle  { background: #ffffff08; color: #ffffff40; border: 1px solid #ffffff10; }
-        .module-status.lock  { background: #ffffff05; color: #ffffff20; border: 1px solid #ffffff08; }
-
-        .module-info { flex: 1; min-width: 0; }
-
-        .module-name {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 6px;
-        }
-
-        .progress-bar {
-            height: 4px;
-            background: #ffffff0d;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            border-radius: 4px;
-            transition: width 1s ease;
-        }
-
-        .module-meta {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 5px;
-        }
-
-        .module-meta span {
-            font-size: 11px;
-            color: #ffffff35;
-        }
-
-        .module-cta {
-            font-size: 11px;
-            font-weight: 600;
-            padding: 5px 12px;
-            border-radius: 6px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-
-        /* ── Recommendations ── */
-        .rec-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .rec-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid #ffffff08;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-
-        .rec-item:hover {
-            background: #667eea08;
-            border-color: #667eea30;
-        }
-
-        .rec-dot {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            flex-shrink: 0;
-        }
-
-        .rec-dot.purple { background: linear-gradient(135deg, #667eea, #764ba2); }
-        .rec-dot.pink   { background: linear-gradient(135deg, #f093fb, #f5576c); }
-        .rec-dot.blue   { background: linear-gradient(135deg, #4facfe, #00f2fe); }
-
-        .rec-info { flex: 1; }
-
-        .rec-name {
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 3px;
-        }
-
-        .rec-meta {
-            font-size: 11px;
-            color: #ffffff35;
-        }
-
-        .rec-match {
-            font-size: 11px;
-            font-weight: 700;
-            color: #10b981;
-        }
-
-        /* ── Quick Actions ── */
-        .actions-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .action-card {
-            padding: 16px;
-            border-radius: 12px;
-            border: 1px solid #ffffff08;
-            cursor: pointer;
-            transition: all 0.15s;
-            text-align: center;
-            background: none;
-            color: white;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            width: 100%;
-        }
-
-        .action-card:hover {
-            background: #ffffff06;
-            border-color: #667eea40;
-            transform: translateY(-2px);
-        }
-
-        .action-icon { font-size: 24px; margin-bottom: 8px; }
-
-        .action-name {
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 3px;
-        }
-
-        .action-desc {
-            font-size: 11px;
-            color: #ffffff35;
-        }
-
-        /* ── Toast ── */
-        .toast {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            padding: 12px 18px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 600;
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-            transform: translateY(80px);
-            opacity: 0;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            max-width: 320px;
-        }
-
-        .toast.show { transform: translateY(0); opacity: 1; }
-        .toast.success { background: linear-gradient(135deg, #10b981, #059669); }
-        .toast.error   { background: linear-gradient(135deg, #ef4444, #dc2626); }
-        .toast.info    { background: linear-gradient(135deg, #667eea, #764ba2); }
-
-        /* ── Spinner ── */
-        .spin {
-            width: 14px; height: 14px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* ── Responsive ── */
-        @media (max-width: 1100px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .content-grid { grid-template-columns: 1fr; }
-        }
-
-        @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); }
-            .main { margin-left: 0; padding: 20px; max-width: 100vw; }
-            .stats-grid { grid-template-columns: 1fr 1fr; }
-            .header { flex-direction: column; align-items: flex-start; gap: 16px; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroLearn AI — Dashboard</title>
+<meta name="description" content="AI-powered adaptive learning dashboard. Track your progress, start lessons, and grow your skills.">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<div class="toast" id="toast"></div>
-
-<div class="layout">
-
-    <!-- ── Sidebar ── -->
-    <aside class="sidebar">
-        <div class="logo">
-            <div class="logo-icon">🧠</div>
-            <span class="logo-text">NeuroLearn</span>
-        </div>
-
-        <div class="nav-group">
-            <span class="nav-label">MENU</span>
-
-            <a class="nav-item active" href="index.html">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="3" width="7" height="7" rx="1"/>
-                    <rect x="14" y="3" width="7" height="7" rx="1"/>
-                    <rect x="3" y="14" width="7" height="7" rx="1"/>
-                    <rect x="14" y="14" width="7" height="7" rx="1"/>
-                </svg>
-                Dashboard
-            </a>
-
-            <a class="nav-item" href="lesson.html">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polygon points="5 3 19 12 5 21 5 3"/>
-                </svg>
-                Start Lesson
-            </a>
-
-            <button class="nav-item action-export">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                Export Data
-            </button>
-        </div>
-
-        <div class="sidebar-bottom">
-            <div class="user-row">
-                <div class="avatar" id="user-avatar"><span id="user-initials">U</span></div>
-                <div class="user-info">
-                    <div class="user-name" id="user-name">Loading...</div>
-                    <div class="user-email" id="user-email">...</div>
-                </div>
-            </div>
-            <button class="logout-btn" onclick="logout()">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                    <polyline points="16 17 21 12 16 7"/>
-                    <line x1="21" y1="12" x2="9" y2="12"/>
-                </svg>
-                Sign Out
-            </button>
-        </div>
-    </aside>
-
-    <!-- ── Main Content ── -->
-    <main class="main">
-
-        <!-- Header -->
-        <div class="header">
-            <div class="header-left">
-                <h1 id="page-title">Welcome back 👋</h1>
-                <p>Your AI-powered learning dashboard</p>
-            </div>
-            <div class="header-right">
-                <button class="btn btn-primary" id="btn-start">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <polygon points="5 3 19 12 5 21 5 3"/>
-                    </svg>
-                    Start Learning
-                </button>
-            </div>
-        </div>
-
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-top">
-                    <div class="stat-icon" style="background:#667eea15">📚</div>
-                    <span class="stat-trend">+12%</span>
-                </div>
-                <div class="stat-value" id="stat-sessions">24</div>
-                <div class="stat-label">Sessions Completed</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-top">
-                    <div class="stat-icon" style="background:#8b5cf615">🎯</div>
-                    <span class="stat-trend">+5.2%</span>
-                </div>
-                <div class="stat-value" id="stat-score">78.5%</div>
-                <div class="stat-label">Average Score</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-top">
-                    <div class="stat-icon" style="background:#10b98115">⚡</div>
-                    <span class="stat-trend">+7%</span>
-                </div>
-                <div class="stat-value" id="stat-engagement">82%</div>
-                <div class="stat-label">Engagement Level</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-top">
-                    <div class="stat-icon" style="background:#f9731615">🔥</div>
-                    <span class="stat-trend" id="streak-trend">7 days</span>
-                </div>
-                <div class="stat-value" id="stat-streak">7</div>
-                <div class="stat-label">Day Streak</div>
-            </div>
-        </div>
-
-        <!-- Content Grid -->
-        <div class="content-grid">
-
-            <!-- Left Column -->
-            <div style="display:flex; flex-direction:column; gap:20px;">
-
-                <!-- Modules -->
-                <div class="card">
-                    <div class="card-head">
-                        <div>
-                            <div class="card-title">Learning Path</div>
-                            <div class="card-sub">Click a module to start AI lesson</div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="module-list">
-
-                            <div class="module-item" onclick="showToast('Python Basics is already completed! 🎉', 'success')">
-                                <div class="module-status done">✓</div>
-                                <div class="module-info">
-                                    <div class="module-name">Python Basics</div>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width:100%; background:#10b981;"></div>
-                                    </div>
-                                    <div class="module-meta">
-                                        <span>12 lessons</span>
-                                        <span style="color:#10b981;">Completed</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="module-item" onclick="goToLesson('Dictionary Methods and Comprehensions', 'intermediate')">
-                                <div class="module-status active">▶</div>
-                                <div class="module-info">
-                                    <div class="module-name">Data Structures</div>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width:75%; background:linear-gradient(90deg,#667eea,#764ba2);"></div>
-                                    </div>
-                                    <div class="module-meta">
-                                        <span>9 / 12 lessons</span>
-                                        <span>3h left</span>
-                                    </div>
-                                </div>
-                                <button class="module-cta">Continue</button>
-                            </div>
-
-                            <div class="module-item" onclick="goToLesson('Classes and Objects in Python', 'intermediate')">
-                                <div class="module-status idle">○</div>
-                                <div class="module-info">
-                                    <div class="module-name">Object-Oriented Programming</div>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width:45%; background:linear-gradient(90deg,#8b5cf6,#6d28d9);"></div>
-                                    </div>
-                                    <div class="module-meta">
-                                        <span>5 / 11 lessons</span>
-                                        <span>In progress</span>
-                                    </div>
-                                </div>
-                                <button class="module-cta">Start</button>
-                            </div>
-
-                            <div class="module-item locked" onclick="showToast('Complete OOP first to unlock Advanced Algorithms 🔒', 'info')">
-                                <div class="module-status lock">🔒</div>
-                                <div class="module-info">
-                                    <div class="module-name">Advanced Algorithms</div>
-                                    <div class="module-meta">
-                                        <span>Locked — complete OOP first</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Actions -->
-                <div class="card">
-                    <div class="card-head">
-                        <div>
-                            <div class="card-title">Quick Actions</div>
-                            <div class="card-sub">Everything you need in one place</div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="actions-grid">
-                            <button class="action-card" onclick="goToLesson('Python Basics Quiz', 'beginner')">
-                                <div class="action-icon">🧪</div>
-                                <div class="action-name">Take Quiz</div>
-                                <div class="action-desc">Test your knowledge</div>
-                            </button>
-                            <button class="action-card" onclick="goToLesson('Advanced Algorithms Introduction', 'advanced')">
-                                <div class="action-icon">🚀</div>
-                                <div class="action-name">Challenge Mode</div>
-                                <div class="action-desc">Push your limits</div>
-                            </button>
-                            <button class="action-card action-export">
-                                <div class="action-icon">📊</div>
-                                <div class="action-name">Export Progress</div>
-                                <div class="action-desc">Download your data</div>
-                            </button>
-                            <button class="action-card" onclick="goToLesson('Python Review and Practice', 'beginner')">
-                                <div class="action-icon">🔄</div>
-                                <div class="action-name">Review</div>
-                                <div class="action-desc">Revisit past lessons</div>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Right Column -->
-            <div style="display:flex; flex-direction:column; gap:20px;">
-
-                <!-- Cognitive Profile -->
-                <div class="card">
-                    <div class="card-head">
-                        <div>
-                            <div class="card-title">Your Profile</div>
-                            <div class="card-sub">Cognitive learning DNA</div>
-                        </div>
-                    </div>
-                    <div class="card-body" style="display:flex; flex-direction:column; gap:10px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:#ffffff05; border-radius:8px;">
-                            <span style="font-size:13px; color:#ffffff60;">Learning Style</span>
-                            <span style="font-size:13px; font-weight:700; color:#a78bfa;" id="profile-style">Visual</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:#ffffff05; border-radius:8px;">
-                            <span style="font-size:13px; color:#ffffff60;">Cognitive Capacity</span>
-                            <span style="font-size:13px; font-weight:700; color:#a78bfa;" id="profile-capacity">7.5 / 10</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:#ffffff05; border-radius:8px;">
-                            <span style="font-size:13px; color:#ffffff60;">Processing Speed</span>
-                            <span style="font-size:13px; font-weight:700; color:#10b981;" id="profile-speed">Fast</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:#ffffff05; border-radius:8px;">
-                            <span style="font-size:13px; color:#ffffff60;">Working Memory</span>
-                            <span style="font-size:13px; font-weight:700; color:#10b981;" id="profile-memory">High</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- AI Recommendations -->
-                <div class="card">
-                    <div class="card-head">
-                        <div>
-                            <div class="card-title">Recommended</div>
-                            <div class="card-sub">AI-picked for you</div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="rec-list" id="recommendation-list">
-                            <div class="rec-item" onclick="goToLesson('Python Data Visualization', 'intermediate')">
-                                <div class="rec-dot purple"></div>
-                                <div class="rec-info">
-                                    <div class="rec-name">Python Data Visualization</div>
-                                    <div class="rec-meta">Interactive • 45 min</div>
-                                </div>
-                                <span class="rec-match">92%</span>
-                            </div>
-                            <div class="rec-item" onclick="goToLesson('Algorithmic Thinking', 'intermediate')">
-                                <div class="rec-dot pink"></div>
-                                <div class="rec-info">
-                                    <div class="rec-name">Algorithmic Thinking</div>
-                                    <div class="rec-meta">Reading • 60 min</div>
-                                </div>
-                                <span class="rec-match">88%</span>
-                            </div>
-                            <div class="rec-item" onclick="goToLesson('Design Patterns in Python', 'advanced')">
-                                <div class="rec-dot blue"></div>
-                                <div class="rec-info">
-                                    <div class="rec-name">Design Patterns</div>
-                                    <div class="rec-meta">Practice • 90 min</div>
-                                </div>
-                                <span class="rec-match">85%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </main>
+<!-- Mesh background -->
+<div class="mesh-bg">
+  <div class="mesh-orb mesh-orb-1"></div>
+  <div class="mesh-orb mesh-orb-2"></div>
+  <div class="mesh-orb mesh-orb-3"></div>
 </div>
 
+<!-- Mobile hamburger -->
+<button class="hamburger" id="hamburger" aria-label="Menu">☰</button>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- Start Lesson Modal -->
+<div class="modal-overlay" id="modal-start">
+  <div class="modal anim-scale">
+    <button class="modal-close" onclick="closeModal('modal-start')">✕</button>
+    <div class="modal-title">🚀 Start a New Lesson</div>
+    <div class="modal-sub">Choose a topic and your preferred difficulty level.</div>
+    <div class="form-group">
+      <label class="form-label">Topic</label>
+      <input class="form-input" id="lesson-topic" placeholder="e.g. Python Lists, OOP, Algorithms…" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Difficulty</label>
+      <select class="form-select" id="lesson-diff">
+        <option value="beginner">🟢 Beginner</option>
+        <option value="intermediate" selected>🟡 Intermediate</option>
+        <option value="advanced">🔴 Advanced</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-start')">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="btn-go-lesson" onclick="confirmStartLesson()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Start Lesson
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal-overlay" id="modal-export">
+  <div class="modal anim-scale">
+    <button class="modal-close" onclick="closeModal('modal-export')">✕</button>
+    <div class="modal-title">📊 Export Progress</div>
+    <div class="modal-sub">Download your learning data as a JSON file.</div>
+    <div id="export-status" style="padding:16px;background:var(--surface-2);border-radius:var(--radius-md);font-size:13px;color:var(--text-secondary);text-align:center;">
+      Ready to export your progress data.
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-export')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="runExport()">Download</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">🧠</div>
+      <span class="logo-text">NeuroLearn</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <span class="nav-label">Main Menu</span>
+
+    <a class="nav-item active" href="index.html">
+      <span class="icon">🏠</span>
+      <span class="label">Dashboard</span>
+    </a>
+    <button class="nav-item" id="nav-start-lesson">
+      <span class="icon">▶️</span>
+      <span class="label">Start Lesson</span>
+      <span class="nav-badge">AI</span>
+    </button>
+    <button class="nav-item" id="nav-quiz">
+      <span class="icon">🧪</span>
+      <span class="label">Take Quiz</span>
+    </button>
+    <button class="nav-item" id="nav-export">
+      <span class="icon">📤</span>
+      <span class="label">Export Data</span>
+    </button>
+  </div>
+
+  <div class="nav-section">
+    <span class="nav-label">Learning Path</span>
+    <button class="nav-item" onclick="scrollTo({top:0,behavior:'smooth'})">
+      <span class="icon">🗺️</span>
+      <span class="label">My Path</span>
+    </button>
+    <button class="nav-item" onclick="showToast('Achievements coming soon! 🏆','info')">
+      <span class="icon">🏆</span>
+      <span class="label">Achievements</span>
+      <span class="nav-badge">Soon</span>
+    </button>
+  </div>
+
+  <hr class="nav-divider">
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar" id="user-avatar"><span id="user-initials">?</span></div>
+      <div class="user-info">
+        <div class="user-name" id="user-name">Loading…</div>
+        <div class="user-email" id="user-email">…</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="logout()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
+
+  <!-- Page Header -->
+  <div class="page-header anim-rise">
+    <div class="header-row">
+      <div>
+        <h1 class="page-title" id="page-title">Welcome back 👋</h1>
+        <p class="page-subtitle">Your AI‑powered adaptive learning dashboard</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-secondary btn-sm" id="btn-export-header">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </button>
+        <button class="btn btn-primary" id="btn-start">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Start Learning
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card anim-rise" style="--delay:.05s">
+      <div class="stat-header">
+        <div class="stat-icon" style="background:rgba(124,92,252,.15)">📚</div>
+        <span class="stat-trend up" id="trend-sessions">+12%</span>
+      </div>
+      <div class="stat-value" id="stat-sessions">24</div>
+      <div class="stat-label">Sessions Completed</div>
+    </div>
+    <div class="stat-card anim-rise" style="--delay:.1s">
+      <div class="stat-header">
+        <div class="stat-icon" style="background:rgba(79,142,247,.15)">🎯</div>
+        <span class="stat-trend up" id="trend-score">+5.2%</span>
+      </div>
+      <div class="stat-value" id="stat-score">78.5<span style="font-size:18px;color:var(--text-muted)">%</span></div>
+      <div class="stat-label">Average Score</div>
+    </div>
+    <div class="stat-card anim-rise" style="--delay:.15s">
+      <div class="stat-header">
+        <div class="stat-icon" style="background:rgba(0,212,170,.15)">⚡</div>
+        <span class="stat-trend up" id="trend-eng">+7%</span>
+      </div>
+      <div class="stat-value" id="stat-engagement">82<span style="font-size:18px;color:var(--text-muted)">%</span></div>
+      <div class="stat-label">Engagement Level</div>
+    </div>
+    <div class="stat-card anim-rise" style="--delay:.2s">
+      <div class="stat-header">
+        <div class="stat-icon" style="background:rgba(251,191,36,.15)">🔥</div>
+        <span class="stat-trend up" id="trend-streak">7 days</span>
+      </div>
+      <div class="stat-value" id="stat-streak">7</div>
+      <div class="stat-label">Day Streak</div>
+    </div>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="content-grid">
+
+    <!-- Left Column -->
+    <div class="col">
+
+      <!-- Learning Path -->
+      <div class="glass-card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Learning Path</div>
+            <div class="card-sub">Click any module to launch an AI lesson</div>
+          </div>
+          <span class="chip chip-purple">4 Modules</span>
+        </div>
+        <div class="card-body">
+          <div class="module-list">
+
+            <!-- Module 1: Done -->
+            <div class="module-item" onclick="showToast('Python Basics is already completed! 🎉','success')">
+              <div class="mod-status done">✓</div>
+              <div class="mod-info">
+                <div class="mod-name">Python Basics</div>
+                <div class="prog-bar"><div class="prog-fill" style="width:100%;background:var(--grad-success)"></div></div>
+                <div class="mod-meta"><span>12 lessons</span><span style="color:var(--brand-teal)">Completed ✓</span></div>
+              </div>
+            </div>
+
+            <!-- Module 2: Active -->
+            <div class="module-item" onclick="openLessonModal('Dictionary Methods and Comprehensions','intermediate')">
+              <div class="mod-status active">▶</div>
+              <div class="mod-info">
+                <div class="mod-name">Data Structures</div>
+                <div class="prog-bar"><div class="prog-fill" style="width:75%;background:var(--grad-primary)"></div></div>
+                <div class="mod-meta"><span>9 / 12 lessons</span><span>~3h left</span></div>
+              </div>
+              <button class="mod-cta">Continue</button>
+            </div>
+
+            <!-- Module 3: In Progress -->
+            <div class="module-item" onclick="openLessonModal('Classes and Objects in Python','intermediate')">
+              <div class="mod-status idle">○</div>
+              <div class="mod-info">
+                <div class="mod-name">Object-Oriented Programming</div>
+                <div class="prog-bar"><div class="prog-fill" style="width:45%;background:linear-gradient(90deg,#8b5cf6,#6d28d9)"></div></div>
+                <div class="mod-meta"><span>5 / 11 lessons</span><span>In progress</span></div>
+              </div>
+              <button class="mod-cta">Start</button>
+            </div>
+
+            <!-- Module 4: Locked -->
+            <div class="module-item locked" onclick="showToast('Complete OOP first to unlock Advanced Algorithms 🔒','warning')">
+              <div class="mod-status lock">🔒</div>
+              <div class="mod-info">
+                <div class="mod-name">Advanced Algorithms</div>
+                <div class="prog-bar"><div class="prog-fill" style="width:0%;background:var(--grad-primary)"></div></div>
+                <div class="mod-meta"><span>Locked — complete OOP first</span></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="glass-card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Quick Actions</div>
+            <div class="card-sub">Jump right in</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="actions-grid">
+            <button class="action-card" onclick="openLessonModal('Python Basics Quiz','beginner')">
+              <div class="action-icon">🧪</div>
+              <div class="action-name">Take Quiz</div>
+              <div class="action-desc">Test your knowledge</div>
+            </button>
+            <button class="action-card" onclick="openLessonModal('Advanced Algorithms Introduction','advanced')">
+              <div class="action-icon">🚀</div>
+              <div class="action-name">Challenge Mode</div>
+              <div class="action-desc">Push your limits</div>
+            </button>
+            <button class="action-card action-export">
+              <div class="action-icon">📊</div>
+              <div class="action-name">Export Progress</div>
+              <div class="action-desc">Download your data</div>
+            </button>
+            <button class="action-card" onclick="openLessonModal('Python Review and Practice','beginner')">
+              <div class="action-icon">🔄</div>
+              <div class="action-name">Review</div>
+              <div class="action-desc">Revisit past lessons</div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Streak Calendar -->
+      <div class="glass-card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Weekly Streak 🔥</div>
+            <div class="card-sub">Keep your momentum going</div>
+          </div>
+          <span class="chip chip-warn" id="streak-chip">7 days</span>
+        </div>
+        <div class="card-body">
+          <div class="streak-dots" id="streak-dots"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column -->
+    <div class="col">
+
+      <!-- Cognitive Profile -->
+      <div class="glass-card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Cognitive Profile</div>
+            <div class="card-sub">Your learning DNA</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="profile-stats">
+            <div class="profile-stat-row">
+              <span class="pstat-label">🎨 Learning Style</span>
+              <span class="pstat-value" id="profile-style">Visual</span>
+            </div>
+            <div class="profile-stat-row">
+              <span class="pstat-label">🧠 Cognitive Load</span>
+              <span class="pstat-value" id="profile-capacity">7.5 / 10</span>
+            </div>
+            <div class="profile-stat-row">
+              <span class="pstat-label">⚡ Processing Speed</span>
+              <span class="pstat-value" id="profile-speed">Fast</span>
+            </div>
+            <div class="profile-stat-row">
+              <span class="pstat-label">💾 Working Memory</span>
+              <span class="pstat-value" id="profile-memory">High</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Recommendations -->
+      <div class="glass-card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">AI Recommendations</div>
+            <div class="card-sub">Curated for you</div>
+          </div>
+          <span class="chip chip-teal">Live</span>
+        </div>
+        <div class="card-body">
+          <div class="rec-list" id="rec-list">
+            <div class="rec-item" onclick="openLessonModal('Python Data Visualization','intermediate')">
+              <div class="rec-dot c1"></div>
+              <div class="rec-info">
+                <div class="rec-name">Python Data Visualization</div>
+                <div class="rec-meta">Interactive • 45 min</div>
+              </div>
+              <span class="rec-match">92%</span>
+            </div>
+            <div class="rec-item" onclick="openLessonModal('Algorithmic Thinking','intermediate')">
+              <div class="rec-dot c2"></div>
+              <div class="rec-info">
+                <div class="rec-name">Algorithmic Thinking</div>
+                <div class="rec-meta">Reading • 60 min</div>
+              </div>
+              <span class="rec-match">88%</span>
+            </div>
+            <div class="rec-item" onclick="openLessonModal('Design Patterns in Python','advanced')">
+              <div class="rec-dot c3"></div>
+              <div class="rec-info">
+                <div class="rec-name">Design Patterns</div>
+                <div class="rec-meta">Practice • 90 min</div>
+              </div>
+              <span class="rec-match">85%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Today's Goal -->
+      <div class="glass-card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Today's Goal</div>
+            <div class="card-sub">Daily learning target</div>
+          </div>
+        </div>
+        <div class="card-body" style="text-align:center">
+          <svg width="110" height="110" viewBox="0 0 110 110" style="margin-bottom:12px">
+            <circle cx="55" cy="55" r="46" fill="none" stroke="var(--surface-3)" stroke-width="10"/>
+            <circle cx="55" cy="55" r="46" fill="none" stroke="url(#ringGrad)" stroke-width="10"
+              stroke-dasharray="289" stroke-dashoffset="100" stroke-linecap="round"
+              style="transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset 1s var(--ease-spring)"/>
+            <defs>
+              <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#7c5cfc"/>
+                <stop offset="100%" stop-color="#4f8ef7"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div style="font-size:22px;font-weight:800;margin-bottom:4px" id="goal-pct">65%</div>
+          <div style="font-size:12px;color:var(--text-secondary)">2 of 3 lessons done</div>
+          <button class="btn btn-primary btn-sm" style="margin-top:14px;width:100%" onclick="openLessonModal('','intermediate')">
+            Complete Goal →
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
 <script src="app.js"></script>
+<script>
+// ── Modal helpers ──
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// Close on backdrop click
+document.querySelectorAll('.modal-overlay').forEach(ov => {
+  ov.addEventListener('click', e => { if(e.target===ov) ov.classList.remove('open'); });
+});
+
+// ── Open lesson modal ──
+function openLessonModal(topic, diff='intermediate') {
+  document.getElementById('lesson-topic').value = topic || '';
+  document.getElementById('lesson-diff').value = diff;
+  openModal('modal-start');
+  setTimeout(()=>document.getElementById('lesson-topic').select(),100);
+}
+
+// ── Confirm start lesson ──
+function confirmStartLesson() {
+  const topic = document.getElementById('lesson-topic').value.trim();
+  const diff  = document.getElementById('lesson-diff').value;
+  if (!topic) {
+    document.getElementById('lesson-topic').style.border='1.5px solid #f05f5f';
+    document.getElementById('lesson-topic').placeholder='Please enter a topic!';
+    return;
+  }
+  closeModal('modal-start');
+  window.location.href = `lesson.html?topic=${encodeURIComponent(topic)}&difficulty=${diff}`;
+}
+
+// Enter key in topic input
+document.getElementById('lesson-topic')?.addEventListener('keydown', e => {
+  if(e.key==='Enter') confirmStartLesson();
+});
+
+// ── Export modal ──
+async function runExport() {
+  const user = getCurrentUser?.() || JSON.parse(sessionStorage.getItem('neurolearn_user')||localStorage.getItem('neurolearn_user')||'{}');
+  if(user?.is_guest) {
+    document.getElementById('export-status').textContent = '⚠️ Export is not available in Guest Mode.';
+    document.getElementById('export-status').style.color='#fbbf24';
+    return;
+  }
+  document.getElementById('export-status').textContent = 'Downloading…';
+  try {
+    const data = { user, exported_at: new Date().toISOString(), progress: { sessions:24, score:0.785, streak:7 } };
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `neurolearn-${user.user_id || 'guest'}.json`; a.click();
+    URL.revokeObjectURL(url);
+    document.getElementById('export-status').textContent = '✅ Downloaded successfully!';
+    document.getElementById('export-status').style.color='var(--brand-teal)';
+  } catch {
+    document.getElementById('export-status').textContent = '❌ Export failed. Try again.';
+    document.getElementById('export-status').style.color='#f05f5f';
+  }
+}
+
+// Wire header buttons
+document.getElementById('btn-start').addEventListener('click', ()=>openLessonModal('','intermediate'));
+document.getElementById('btn-export-header').addEventListener('click', ()=>openModal('modal-export'));
+document.getElementById('nav-start-lesson').addEventListener('click', ()=>openLessonModal('','intermediate'));
+document.getElementById('nav-quiz').addEventListener('click', ()=>openLessonModal('Python Practice Quiz','beginner'));
+document.getElementById('nav-export').addEventListener('click', ()=>openModal('modal-export'));
+document.querySelectorAll('.action-export').forEach(b=>b.addEventListener('click',()=>openModal('modal-export')));
+
+// ── Streak calendar ──
+function renderStreak(streakDays=7) {
+  const container = document.getElementById('streak-dots');
+  if(!container) return;
+  const days=['M','T','W','T','F','S','S'];
+  const today = new Date().getDay(); // 0=Sun
+  container.innerHTML='';
+  days.forEach((d,i)=>{
+    const el = document.createElement('div');
+    el.className = 'streak-dot';
+    const dayIdx = i === 6 ? 0 : i+1;
+    if(dayIdx === today) { el.classList.add('today'); }
+    else if(i < streakDays) { el.classList.add('done'); }
+    el.textContent = d;
+    container.appendChild(el);
+  });
+}
+renderStreak(7);
+
+// ── Mobile sidebar ──
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebar-overlay');
+document.getElementById('hamburger').addEventListener('click',()=>{
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('open');
+});
+overlay.addEventListener('click',()=>{
+  sidebar.classList.remove('open');
+  overlay.classList.remove('open');
+});
+
+// Expose helpers for app.js
+window.showToast = window.showToast || function(){};
+window.openLessonModal = openLessonModal;
+window.openModal = openModal;
+window.closeModal = closeModal;
+</script>
 </body>
 </html>
