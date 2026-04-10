@@ -6,6 +6,13 @@ const API_BASE_URL = 'https://ai-neuro-backend.onrender.com';
 // ========================================
 
 function getCurrentUser() {
+    // Guest users are stored in sessionStorage (cleared when tab closes)
+    // Signed-in users are stored in localStorage (persisted)
+    const guestStr = sessionStorage.getItem('neurolearn_user');
+    if (guestStr) {
+        try { return JSON.parse(guestStr); } catch { sessionStorage.removeItem('neurolearn_user'); }
+    }
+
     const userStr = localStorage.getItem('neurolearn_user');
     if (!userStr) {
         if (!window.location.pathname.endsWith('login.html')) {
@@ -31,6 +38,7 @@ function getCurrentUser() {
 
 function logout() {
     localStorage.removeItem('neurolearn_user');
+    sessionStorage.removeItem('neurolearn_user');
     window.location.href = 'login.html';
 }
 
@@ -62,6 +70,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function setupUserProfile() {
     if (!currentUser) return;
+
+    // Show guest banner if guest
+    if (currentUser.is_guest) {
+        const banner = document.createElement('div');
+        banner.style.cssText = 'background:#fff8e1;border-bottom:1px solid #ffe082;padding:8px 20px;font-size:12px;color:#795548;display:flex;align-items:center;gap:8px;position:fixed;top:0;left:0;right:0;z-index:999;';
+        banner.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> <span><b>Guest Mode</b> — No data will be saved. <a href="login.html" style="color:#4285f4;font-weight:600;">Sign in with Google</a> to save your progress.</span>`;
+        document.body.prepend(banner);
+    }
 
     // Update avatar — use Google profile photo if available
     const avatarEl = document.querySelector('.user-avatar');
@@ -152,6 +168,12 @@ function initializeAnimations() {
 // ========================================
 
 async function loadUserData() {
+    // Skip API call for guests
+    if (currentUser?.is_guest) {
+        showFallbackData();
+        return;
+    }
+
     try {
         showLoadingState();
 
@@ -179,6 +201,9 @@ async function loadUserData() {
 // ========================================
 
 async function loadRecommendations() {
+    // Skip API call for guests — static recommendations only
+    if (currentUser?.is_guest) return;
+
     try {
         const response = await fetch(`${API_BASE_URL}/api/v1/adaptation/recommend-content`, {
             method: 'POST',
@@ -328,6 +353,10 @@ setTimeout(animateProgressBars, 500);
 // Export Data button
 document.querySelectorAll('.action-export').forEach(btn => {
     btn.addEventListener('click', async () => {
+        if (currentUser?.is_guest) {
+            alert('⚠️ Guest Mode: Data export is only available for signed-in users.');
+            return;
+        }
         try {
             const response = await fetch(`${API_BASE_URL}/api/v1/users/${USER_ID}/export`, {
                 headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` }
