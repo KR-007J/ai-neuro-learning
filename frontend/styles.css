@@ -48,6 +48,11 @@
     --dur-med:   260ms;
     --sidebar-w: 240px;
     --sidebar-collapsed-w: 72px;
+
+    /* Next Gen: Holographic & Neural */
+    --hologram-cyan:  rgba(0, 255, 255, 0.15);
+    --hologram-scan:  rgba(255, 255, 255, 0.05);
+    --neural-wave:   rgba(99, 102, 241, 0.3);
 }
 
 [data-theme="light"] {
@@ -62,8 +67,27 @@
     --text-muted:     #94a3b8;
     --shadow-base:    rgba(15, 23, 42, 0.08);
     --orb-opacity:    0.06;
-    --glass-border:   rgba(0, 0, 0, 0.05);
+    --glass-border:   rgba(0, 0, 0, 0.08);
     --glass-bg:       rgba(255, 255, 255, 0.7);
+    --glass-blur:     24px;
+}
+
+/* ── Skip Link (Accessibility) ── */
+.skip-link {
+    position: absolute;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--grad-primary);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    z-index: 10000;
+    transition: top 0.3s var(--ease-smooth);
+}
+.skip-link:focus {
+    top: 12px;
 }
 
 /* ── Reset ── */
@@ -261,9 +285,36 @@ body.sidebar-collapsed .main-content {
 
 /* ── Page Header ── */
 .page-header { margin-bottom:28px; }
-.header-row { display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; }
+.header-main { display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap; }
+.header-left { display:flex; align-items:center; gap:16px; flex:1; }
+.header-titles { min-width: 150px; }
 .page-title { font-size:28px; font-weight:800; margin-bottom:4px; }
 .page-subtitle { font-size:14px; color:var(--text-secondary); }
+
+.search-container {
+    position: relative;
+    max-width: 400px;
+    width: 100%;
+}
+.search-input {
+    padding-right: 40px !important;
+    background: var(--surface-1) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-md) !important;
+}
+.search-kbd {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    color: var(--text-muted);
+    pointer-events: none;
+}
 .header-actions { display:flex; gap:10px; }
 
 /* ════════════════════════════════════════
@@ -359,6 +410,30 @@ body.sidebar-collapsed .main-content {
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     transition: all var(--dur-med) var(--ease-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Holographic Scanline Effect */
+.glass-card::after {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        to bottom,
+        transparent,
+        var(--hologram-scan) 50%,
+        transparent
+    );
+    pointer-events: none;
+    transition: 0.8s var(--ease-smooth);
+}
+
+.glass-card:hover::after {
+    top: 100%;
 }
 
 .stat-card {
@@ -682,6 +757,27 @@ body.sidebar-collapsed .main-content {
 .anim-rise     { animation:fadeInUp .5s var(--ease-spring) both; }
 .anim-scale    { animation:scaleIn .4s var(--ease-spring) both; }
 
+/* Neural Waveforms */
+.neural-wave-container {
+    height: 60px;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    margin-top: 15px;
+}
+.wave-bar {
+    flex: 1;
+    background: var(--grad-primary);
+    border-radius: 2px 2px 0 0;
+    animation: wavePulse 1.5s infinite var(--ease-smooth);
+    min-height: 4px;
+}
+
+@keyframes wavePulse {
+    0%, 100% { height: 20%; opacity: 0.5; }
+    50%      { height: 80%; opacity: 1; }
+}
+
 /* ════════════════════════════════════════
    GUEST BANNER
 ════════════════════════════════════════ */
@@ -792,3 +888,15 @@ body.sidebar-collapsed .main-content {
     z-index:199;
 }
 .sidebar-overlay.open { display:block; }
+
+.logo-text.glitch:hover {
+    animation: text-glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+}
+@keyframes text-glitch {
+    0%   { transform: translate(0); text-shadow: none; }
+    20%  { transform: translate(-2px, 2px); text-shadow: 2px 0 #ff00c1, -2px 0 #00fff9; }
+    40%  { transform: translate(-2px, -2px); text-shadow: 2px 0 #ff00c1, -2px 0 #00fff9; }
+    60%  { transform: translate(2px, 2px); text-shadow: 2px 0 #ff00c1, -2px 0 #00fff9; }
+    100% { transform: translate(0); text-shadow: none; }
+}
+

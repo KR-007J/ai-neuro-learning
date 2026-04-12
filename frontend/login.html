@@ -3,18 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="robots" content="noindex, nofollow">
     <title>Sign in - NeuroLearn AI</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <style>
         :root {
             --google-blue: #4285f4;
             --google-red: #ea4335;
             --google-yellow: #fbbc05;
             --google-green: #34a853;
-            --text-primary: #202124;
-            --text-secondary: #5f6368;
-            --border-color: #dadce0;
+            --text-primary: var(--text-primary);
+            --text-secondary: var(--text-secondary);
+            --border-color: var(--border);
         }
 
         body {
@@ -160,8 +165,12 @@
     <!-- Official Google Identity Services SDK -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
+    <script src="app.js"></script>
     <script>
-        const API_BASE_URL = 'https://ai-neuro-backend.onrender.com';
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof initUI === 'function') initUI();
+        });
+        const API_BASE_URL = 'http://localhost:10000';
         const GOOGLE_CLIENT_ID = '923014571297-1oknpmcoarlqn6nllp763l41sqk4c8sk.apps.googleusercontent.com';
 
         // Check if already logged in

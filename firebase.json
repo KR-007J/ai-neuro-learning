@@ -23,5 +23,19 @@
         ]
       }
     ]
+  },
+  "firestore": {
+    "database": "(default)",
+    "location": "us-central1",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "NeuroLearn AI",
+        "supportEmail": "krishjoshikrishjoshi9@gmail.com"
+      }
+    }
   }
 }

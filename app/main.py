@@ -6,6 +6,9 @@ AI-Enabled Neuro-Cognitive Adaptive Learning Framework
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 import uvicorn
 from app.config import settings
 from app.api import routes_adaptation, routes_assessment, routes_user
@@ -14,14 +17,24 @@ import time
 
 logger = setup_logger(__name__)
 
+limiter = Limiter(key_func=get_remote_address)
+
 app = FastAPI(
     title="Neuro-Cognitive Adaptive Learning API",
     description="AI-powered adaptive learning framework with cognitive profiling and personalized content delivery",
     version="1.0.0",
-    # Hide docs in production for security
     docs_url="/docs" if settings.DEBUG else None,
     redoc_url="/redoc" if settings.DEBUG else None,
 )
+
+app.state.limiter = limiter
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    return JSONResponse(
+        status_code=429,
+        content={"detail": "Too many requests. Please slow down and try again."}
+    )
 
 # ✅ Use cors_origins property (parsed list) instead of raw ALLOWED_ORIGINS string
 app.add_middleware(

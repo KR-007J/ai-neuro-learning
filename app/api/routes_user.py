@@ -3,16 +3,20 @@ User API Routes
 Endpoints for user management and profile operations
 """
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from typing import List, Optional
 from pydantic import BaseModel
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from app.schemas.user_schema import (
     UserCreate, UserResponse, UserUpdate, UserStats, UserPreferences
 )
 from app.schemas.response_schema import StandardResponse
 from datetime import datetime
 import uuid
+
+limiter = Limiter(key_func=get_remote_address)
 
 router = APIRouter()
 
@@ -30,7 +34,8 @@ class GoogleAuthRequest(BaseModel):
 
 
 @router.post("/google-auth", response_model=StandardResponse)
-async def google_auth(request: GoogleAuthRequest):
+@limiter.limit("5/minute")
+async def google_auth(request: Request, google_req: GoogleAuthRequest):
     """Handle Google OAuth login — verify token and create/fetch user"""
 
     # SECURITY TODO: In production, verify the id_token using Google's library:
